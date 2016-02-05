@@ -1,0 +1,17 @@
+out
+/out
+/target
+/classes
+/checkouts
+pom.xml.asc
+*.map
+*.js
+*.jar
+*.class
+/.lein-*
+/.nrepl-port
+*init.clj
+.repl*
+node_modules
+.cljs_node_repl
+*.log
