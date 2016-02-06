@@ -1,6 +1,6 @@
 (ns om-css.dom
   (:refer-clojure :exclude [map meta time mask])
-  (:require-macros [om-css.dom :refer [gen-tag-fns format-class-name]])
+  (:require-macros [om-css.dom :refer [gen-tag-fns]])
   (:require [om.dom :as dom]
             [clojure.string :as string]))
 
@@ -44,34 +44,48 @@
    Recursively formats map values (ie :style attribute)"
   [opt-val]
   (cond
-    (map? opt-val)
-    (format-opts opt-val)
-    :else
-    opt-val))
+    (map? opt-val) (format-opts opt-val)
+    :else opt-val))
+
+(defn- format-class-name [this-arg class-name]
+  "generate namespace qualified classname"
+  (let [ns-name (aget (type this-arg) "ns")
+        res (str (string/replace (munge ns-name) #"\." "_") "_" (name class-name))]
+    res))
+
+(defn- format-attrs [this-arg attrs]
+  "leaves :className unchanged, formats :class accordingly"
+  (->> attrs
+    (clojure.core/map
+      (fn [[k v]]
+        [(format-opt-key k)
+         (if (= k :class)
+           (format-class-name this-arg v)
+           (format-opt-val v))]))
+    (into {})))
 
 (defn format-opts
   "Returns JavaScript object for React DOM attributes from opts map"
-  [opts]
+  [this-arg opts]
   (if (map? opts)
     (->> opts
-         (clojure.core/map
-          (fn [[k v]] [(format-opt-key k) (format-opt-val v)]))
-         (into {})
-         clj->js)
+      (format-attrs this-arg)
+      clj->js)
     opts))
 
 (defn parse-params
-  [params]
-  (update
-   (if (map? (first params))
-     [(first params) (rest params)]
-     [nil params])
-   1 flatten))
+  [[this-arg & params]]
+  (let [params' (update
+                  (if (map? (first params))
+                    [(first params) (rest params)]
+                    [nil params])
+                  1 flatten)]
+    (into [this-arg] params')))
 
 (defn render-elem
   [render & params]
-  (let [[attrs children] (parse-params params)]
-    (apply render (format-opts attrs) children)))
+  (let [[this-arg attrs children] (parse-params params)]
+    (apply render (format-opts this-arg attrs) children)))
 
 (gen-tag-fns)
 
