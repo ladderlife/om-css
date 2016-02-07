@@ -1,6 +1,6 @@
 (ns om-css.dom
   (:refer-clojure :exclude [map meta time mask])
-  (:require-macros [om-css.dom :refer [gen-tag-fns defui]])
+  (:require-macros [om-css.dom :refer [gen-tag-fns]])
   (:require [om.dom :as dom]
             [clojure.string :as string]))
 

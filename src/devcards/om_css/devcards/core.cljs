@@ -1,12 +1,11 @@
 (ns om-css.devcards.core
   (:require-macros [devcards.core :as dc :refer [defcard deftest]]
-                   [cljs.test :refer [is testing async]]
-                   [om-css.dom :refer [defui]])
+                   [cljs.test :refer [is testing async]])
   (:require [devcards-om-next.core :as don :refer-macros [defcard-om-next]]
             [goog.dom :as gdom]
             [om.next :as om]
             [om-css.dom :as dom]
-            [om-css.core :as oc]))
+            [om-css.core :as oc :refer-macros [defui]]))
 
 (def style-1
   {:text-align :center})
