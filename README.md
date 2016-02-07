@@ -1,4 +1,5 @@
-# CSS in Components
+# CSS in Components [![Clojars Project](https://img.shields.io/clojars/v/com.ladderlife/om-css.svg)](https://clojars.org/com.ladderlife/om-css)
+
 
 ## How to use it:
 
