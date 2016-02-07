@@ -1,6 +1,7 @@
 (ns om-css.dom
   (:refer-clojure :exclude [map meta time])
-  (:require [clojure.java.io :as io]
+  (:require [cljs.analyzer.api :as ana-api]
+            [clojure.java.io :as io]
             [clojure.string :as string]
             [garden.core :as garden]
             [om.dom :as dom]))
@@ -138,6 +139,29 @@
 (defmacro defui [name & forms]
   (defui* name forms &env))
 
+;; TODO: can we make this not open the file for each atom state change?
+(defn setup-io! []
+  (let [opts (ana-api/get-options)
+        default-fname "out.css"
+        fname (or (:css-output-to opts)
+                (str (:output-dir opts) default-fname)
+                (string/join "/"
+                  (-> (:output-to opts)
+                    (string/split #"/")
+                    (butlast)
+                    vec
+                    (conj default-fname))))]
+    (io/delete-file fname true)
+    (add-watch css :watcher
+      (fn [k atom old-state new-state]
+        (with-open [out ^java.io.Writer (io/make-writer fname {:append true})]
+          (binding [*out* out]
+            (println (nth new-state (-> new-state count dec)))
+            (println)))))))
+
+(setup-io!)
+
+
 (comment
   (reshape-defui
     '(om/IQuery
@@ -179,16 +203,3 @@
         :section (merge {} {:background-color :green})]))
   )
 
-;; TODO: can we make this not open the file for each atom state change?
-(defn setup-io! []
-  ;; TODO: actually read destination file from compiler opts
-  (let [fname "out.css"]
-    (io/delete-file fname true)
-    (add-watch css :watcher
-      (fn [k atom old-state new-state]
-        (with-open [out ^java.io.Writer (io/make-writer fname {:append true})]
-          (binding [*out* out]
-            (println (nth new-state (-> new-state count dec)))
-            (println)))))))
-
-(setup-io!)

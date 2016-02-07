@@ -12,6 +12,7 @@
                 :asset-path "/out"
                 :output-to "resources/public/main.js"
                 :output-dir "resources/public/out"
+                :css-output-to "resources/public/main.css"
                 :parallel-build true
                 :compiler-stats true}}]})
 
