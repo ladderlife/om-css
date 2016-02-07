@@ -1,5 +1,39 @@
 # CSS in Components
 
+## How to use it:
+
+To get started, `:require` om-css in your project:
+
+```clojure
+(ns my-ns.core
+  (:require [om-css.core :as oc :refer-macros [defui]]
+            [om-css.dom :as dom])
+```
+
+When using om-css's `defui`, using `om-css.dom` is required.
+
+Define components as you might do in Om Next. Implement om-css.core's `Style` protocol. Styles must use [Garden](https://github.com/noprompt/garden)'s syntax. An example is displayed below:
+
+```clojure
+(defui Component
+  static oc/Style
+  (style [_]
+    [[:.root {:color "#FFFFF"}]
+     [:.section (merge {} ;;style-1
+                  {:background-color :green})]])
+  Object
+  (render [this]
+    (dom/div {:id "ns-test"}
+      (dom/div {:class :root} "div with class :root"
+        (dom/section {:class :section} "section with class :section"
+          (dom/p {:className "preserved"} "paragraph with class \"preserved\""))))))
+```
+
+Styles written in components are written to a CSS file. You can add an option `:css-output-to` to the Clojurescript compiler with the output path for your styles. [Here](./scripts/figwheel.clj#L15)'s an example.
+
+Check out the file `src/devcards/om_css/devcards/core.cljs` for more examples.
+
+
 ## High level ideas
 - CSS/SASS is not a good programming language and composition, reuse, and
   abstraction should happen in clojure side.
