@@ -48,9 +48,9 @@ Ultimately we want to get to something like this
 (defui Foo
   Style
   (style []
-    [:root {:color (:blue css)}
-     :section (merge css/default-section
-                     {:background-color :green})])
+    [[:.root {:color (:blue css)}]
+     [:.section (merge css/default-section
+                     {:background-color :green})]])
   Object
   (render [this]
     (dom/div {:class :root}
