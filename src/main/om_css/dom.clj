@@ -1,8 +1,11 @@
 (ns om-css.dom
   (:refer-clojure :exclude [map meta time])
-  (:require [clojure.string :as string]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as string]
             [garden.core :as garden]
             [om.dom :as dom]))
+
+(def css (atom []))
 
 ;;; defcomponent
 
@@ -128,6 +131,7 @@
         css-str (garden/css component-style)
         forms (reshape-defui forms)
         forms (concat forms (list 'static 'field 'ns ns-name))]
+    (swap! css into [css-str])
     `(om.next/defui ~name ~@forms)))
 
 (defmacro defui [name & forms]
@@ -174,3 +178,15 @@
         :section (merge {} {:background-color :green})]))
   )
 
+;; TODO: can we make this not open the file for each atom state change?
+(defn setup-io! []
+  ;; TODO: actually read destination file from compiler opts
+  (let [fname "out.css"]
+    (io/delete-file fname true)
+    (add-watch css :watcher
+      (fn [k atom old-state new-state]
+        (with-open [out ^java.io.Writer (io/make-writer fname {:append true})]
+          (binding [*out* out]
+            (println (nth new-state (-> new-state count dec)))))))))
+
+(setup-io!)

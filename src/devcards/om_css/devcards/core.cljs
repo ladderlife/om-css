@@ -24,6 +24,9 @@
         (dom/section {:class :section} "section with class :section"
           (dom/p {:className "preserved"} "paragraph with class \"preserved\""))))))
 
+(defcard-om-next foo-card
+  Foo)
+
 (deftest namespaced-classnames-in-dom
   (testing "classnames are namespace qualified"
     (let [c (gdom/getElement "ns-test")]
@@ -31,8 +34,16 @@
       (is (not (nil? (gdom/getElementByClass "om_css_devcards_core_section"))))
       (is (not (nil? (gdom/getElementByClass "preserved")))))))
 
-(defcard-om-next asd
-  Foo)
+(defui Bar
+  oc/Style
+  (style [_]
+    [[:.bar {:margin "0 auto"}]])
+  Object
+  (render [this]
+    (dom/div {:class :bar} "Bar component")))
+
+(defcard-om-next bar-card
+  Bar)
 
 ;; TODO:
 ;; - test `defui` that doesn't implement style
