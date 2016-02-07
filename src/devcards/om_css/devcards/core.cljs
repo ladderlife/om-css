@@ -8,12 +8,15 @@
             [om-css.dom :as dom]
             [om-css.core :as oc]))
 
+(def style-1
+  {:text-align :center})
+
 (defui Foo
   static oc/Style
   (style [_]
-    [:root {:color "#FFFFF"}
-     :section (merge {} ;;css/default-section
-                     {:background-color :green})])
+    [[:.root {:color "#FFFFF"}]
+     [:.section (merge {} ;;style-1
+                  {:background-color :green})]])
   Object
   (render [this]
     (dom/div {:id "ns-test"}

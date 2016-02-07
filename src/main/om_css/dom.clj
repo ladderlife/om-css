@@ -1,6 +1,7 @@
 (ns om-css.dom
   (:refer-clojure :exclude [map meta time])
-  (:require [om.dom :as dom]))
+  (:require [garden.core :as garden]
+            [om.dom :as dom]))
 
 ;;; defcomponent
 
