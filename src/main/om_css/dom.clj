@@ -98,24 +98,25 @@
     reshape-style-form
     first))
 
-;; TODO: also use the name of the component in the class name
-(defn- format-class-name [ns-name class-name]
+(defn- format-class-name [ns-name component-name class-name]
   "generate namespace qualified classname"
   (let [ns-name ns-name
-        class-name (name class-name)
-        res (str "."
-              (string/replace (munge ns-name) #"\." "_")
-              "_"
-              (subs class-name 1))]
-    res))
+        class-name (name class-name)]
+    (str "." (string/replace (munge ns-name) #"\." "_")
+      "_" component-name "_" (subs class-name 1))))
 
 ;; TODO: styles is last arg because of thread-last in `defui*`
-(defn format-style-classes [ns-name styles]
+(defn format-style-classes [ns-name component-name styles]
   (->> styles
     (clojure.core/map
       #(cond
-         (sequential? %) (format-style-classes ns-name %)
-         (and (keyword? %) (.startsWith (name %) ".")) (format-class-name ns-name %)
+         (sequential? %)
+         (format-style-classes ns-name component-name %)
+
+         (and (keyword? %)
+           (.startsWith (name %) "."))
+         (format-class-name ns-name component-name %)
+
          :else %))
     (into [])))
 
@@ -127,7 +128,7 @@
         component-style (->> (get-component-style forms)
                           (str "(clojure.core/refer 'clojure.core)")
                           load-string
-                          (format-style-classes ns-name))
+                          (format-style-classes ns-name (str name)))
         css-str (garden/css component-style)
         forms (reshape-defui forms)
         forms (concat forms (list 'static 'field 'ns ns-name))]
@@ -187,6 +188,7 @@
       (fn [k atom old-state new-state]
         (with-open [out ^java.io.Writer (io/make-writer fname {:append true})]
           (binding [*out* out]
-            (println (nth new-state (-> new-state count dec)))))))))
+            (println (nth new-state (-> new-state count dec)))
+            (println)))))))
 
 (setup-io!)

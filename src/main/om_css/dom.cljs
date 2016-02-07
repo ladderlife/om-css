@@ -47,16 +47,15 @@
     (map? opt-val) (format-opts opt-val)
     :else opt-val))
 
-;; TODO: also use the name of the component in the class name
 (defn- format-class-name [this-arg class-name]
   "generate namespace qualified classname"
   (let [ns-name (aget (type this-arg) "ns")
         class-name (name class-name)
-        res (str
-              (string/replace (munge ns-name) #"\." "_")
-              "_"
-              class-name)]
-    res))
+        component-name (-> (pr-str (type this-arg))
+                         (string/split #"/")
+                         last)]
+    (str (string/replace (munge ns-name) #"\." "_")
+      "_" component-name "_" class-name)))
 
 (defn- format-attrs [this-arg attrs]
   "leaves :className unchanged, formats :class accordingly"

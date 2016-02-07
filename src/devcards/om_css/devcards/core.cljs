@@ -37,7 +37,8 @@
 (defui Bar
   oc/Style
   (style [_]
-    [[:.bar {:margin "0 auto"}]])
+    [[:.bar {:margin "0 auto"}]
+     [:.other {:padding "0"}]])
   Object
   (render [this]
     (dom/div {:class :bar} "Bar component")))
