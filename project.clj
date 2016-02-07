@@ -11,6 +11,6 @@
                  [devcards-om-next "0.1.1" :scope "test"]]
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
   :source-paths ["src/main" "src/devcards" "src/test"]
-  :clean-targets ^{:protect false} [["resources/public/out"
-                                     "resources/public/main.js"]]
+  :clean-targets ^{:protect false} ["resources/public/out"
+                                    "resources/public/main.js"]
   :target-path "target")
