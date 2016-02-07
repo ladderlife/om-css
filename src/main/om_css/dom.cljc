@@ -1,7 +1,7 @@
 (ns om-css.dom
   (:refer-clojure :exclude [map meta time mask])
-  (:require-macros [om-css.dom :refer [gen-tag-fns]])
-  (:require [om.dom :as dom]
+  #?(:cljs (:require-macros [om-css.dom :refer [gen-tag-fns]]))
+  (:require #?(:cljs [om.dom :as dom])
             [clojure.string :as string]))
 
 ;;; lifted from https://github.com/plumatic/om-tools/blob/master/src/om_tools/dom.cljx
@@ -49,8 +49,14 @@
 
 (defn- format-class-name [this-arg class-name]
   "generate namespace qualified classname"
-  (let [ns-name (aget (type this-arg) "ns")
-        res (str (string/replace (munge ns-name) #"\." "_") "_" (name class-name))]
+  (let [ns-name #?(:clj this-arg
+                   :cljs (aget (type this-arg) "ns"))
+        class-name (name class-name)
+        res (str #?(:clj ".")
+              (string/replace (munge ns-name) #"\." "_")
+              "_"
+              #?(:clj (subs class-name 1)
+                 :cljs class-name))]
     res))
 
 (defn- format-attrs [this-arg attrs]
@@ -64,14 +70,15 @@
            (format-opt-val v))]))
     (into {})))
 
-(defn format-opts
-  "Returns JavaScript object for React DOM attributes from opts map"
-  [this-arg opts]
-  (if (map? opts)
-    (->> opts
-      (format-attrs this-arg)
-      clj->js)
-    opts))
+#?(:cljs
+   (defn format-opts
+     "Returns JavaScript object for React DOM attributes from opts map"
+     [this-arg opts]
+     (if (map? opts)
+       (->> opts
+         (format-attrs this-arg)
+         clj->js)
+       opts)))
 
 (defn parse-params
   [[this-arg & params]]
@@ -87,18 +94,21 @@
   (let [[this-arg attrs children] (parse-params params)]
     (apply render (format-opts this-arg attrs) children)))
 
-(gen-tag-fns)
+#?(:cljs
+   (gen-tag-fns))
 
 ;;; proxy thru to om.dom
+#?(:cljs
+   (defn render
+     [& params]
+     (apply dom/render params)))
 
-(defn render
-  [& params]
-  (apply dom/render params))
+#?(:cljs
+   (defn render-to-str
+     [& params]
+     (apply dom/render-to-str params)))
 
-(defn render-to-str
-  [& params]
-  (apply dom/render-to-str params))
-
-(defn node
-  [& params]
-  (apply dom/node params))
+#?(:cljs
+   (defn node
+     [& params]
+     (apply dom/node params)))

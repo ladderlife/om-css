@@ -75,8 +75,46 @@
             (recur nil dt')))
         dt'))))
 
+(defn get-style-form [forms]
+  (loop [dt forms]
+    (when (seq  dt)
+      (let [form (first dt)]
+        (if (and (not (sequential? form))
+              (not (nil? form))
+              (= (name form) "Style"))
+          (fnext dt)
+          (recur (rest dt)))))))
+
+(defn reshape-style-form [form]
+  (drop 2 form))
+
+;; TODO: add ns format to the styles
+(defn get-component-style [forms]
+  (-> forms
+    get-style-form
+    reshape-style-form
+    first))
+
+;; TODO: styles is last arg because of thread-last in `defui*`
+(defn format-style-classes [ns-name styles]
+  (->> styles
+    (clojure.core/map
+      #(cond
+         (sequential? %) (format-style-classes ns-name %)
+         (and (keyword? %) (.startsWith (name %) ".")) (format-class-name ns-name %)
+         :else %))
+    (into [])))
+
+;; TODO: runtime evaluation to support vars and fns
+;; currently `load-string` fails if the style contains a var/function
+;; call outside the scope of clojure.core
 (defn defui* [name forms env]
   (let [ns-name (-> env :ns :name str)
+        component-style (->> (get-component-style forms)
+                          (str "(clojure.core/refer 'clojure.core)")
+                          load-string
+                          (format-style-classes ns-name))
+        css-str (garden/css component-style)
         forms (reshape-defui forms)
         forms (concat forms (list 'static 'field 'ns ns-name))]
     `(om.next/defui ~name ~@forms)))
@@ -96,4 +134,32 @@
         (dom/div nil (dom/div nil "3")))
       static field a 3
       static om/IQuery
-      (query [this] [:a]))))
+      (query [this] [:a])))
+
+  (get-component-style
+    '(static om/IQuery
+      (query [this])
+      static oc/Style
+      (style [_]
+        [:root {:color "#FFFFF"}
+         :section (merge {} ;;css/default-section
+                    {:background-color :green})])
+     static om/Ident
+     (ident [this])
+     Object
+     (render [this])
+     static om/IQueryParams
+     (params [this])))
+
+  (get-style-form
+    '(Object
+      (render [this])
+      static om/Ident
+      (ident [this])))
+
+  (reshape-style-form
+    '(style [_]
+       [:root {:color "#FFFFF"}
+        :section (merge {} {:background-color :green})]))
+  )
+
