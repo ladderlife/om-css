@@ -1,6 +1,8 @@
 (defproject om-css "0.1.0-SNAPSHOT"
   :description "Om Next + CSS"
   :url "http://github.com/ladderlife/om-css"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.7.228"]
                  [org.omcljs/om "1.0.0-alpha31-SNAPSHOT"]
