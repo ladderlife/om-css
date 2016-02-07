@@ -1,6 +1,7 @@
 (ns om-css.dom
   (:refer-clojure :exclude [map meta time])
-  (:require [garden.core :as garden]
+  (:require [clojure.string :as string]
+            [garden.core :as garden]
             [om.dom :as dom]))
 
 ;;; defcomponent
@@ -94,6 +95,16 @@
     get-style-form
     reshape-style-form
     first))
+
+(defn- format-class-name [ns-name class-name]
+  "generate namespace qualified classname"
+  (let [ns-name ns-name
+        class-name (name class-name)
+        res (str "."
+              (string/replace (munge ns-name) #"\." "_")
+              "_"
+              (subs class-name 1))]
+    res))
 
 ;; TODO: styles is last arg because of thread-last in `defui*`
 (defn format-style-classes [ns-name styles]
