@@ -106,7 +106,7 @@
     (str "." (string/replace (munge ns-name) #"\." "_")
       "_" component-name "_" (subs class-name 1))))
 
-;; TODO: styles is last arg because of thread-last in `defui*`
+;; styles is the last arg because of thread-last in `defui*`
 (defn format-style-classes [ns-name component-name styles]
   (->> styles
     (clojure.core/map
