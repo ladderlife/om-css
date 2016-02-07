@@ -89,13 +89,13 @@
 (defn reshape-style-form [form]
   (drop 2 form))
 
-;; TODO: add ns format to the styles
 (defn get-component-style [forms]
   (-> forms
     get-style-form
     reshape-style-form
     first))
 
+;; TODO: also use the name of the component in the class name
 (defn- format-class-name [ns-name class-name]
   "generate namespace qualified classname"
   (let [ns-name ns-name

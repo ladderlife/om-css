@@ -47,6 +47,7 @@
     (map? opt-val) (format-opts opt-val)
     :else opt-val))
 
+;; TODO: also use the name of the component in the class name
 (defn- format-class-name [this-arg class-name]
   "generate namespace qualified classname"
   (let [ns-name (aget (type this-arg) "ns")
