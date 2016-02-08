@@ -98,14 +98,16 @@
 ;; call outside the scope of clojure.core
 (defn defui* [name forms env]
   (let [ns-name (-> env :ns :name str)
-        component-style (->> (get-component-style forms)
+        component-style (some->> (get-component-style forms)
                           (str "(clojure.core/refer 'clojure.core)")
                           load-string
                           (format-style-classes ns-name (str name)))
-        css-str (garden/css component-style)
+        css-str (when component-style
+                  (garden/css component-style))
         forms (reshape-defui forms)
         forms (concat forms (list 'static 'field 'ns ns-name))]
-    (swap! css assoc [ns-name name] css-str)
+    (when css-str
+      (swap! css assoc [ns-name name] css-str))
     `(om.next/defui ~name ~@forms)))
 
 (defmacro defui [name & forms]

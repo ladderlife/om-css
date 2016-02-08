@@ -46,5 +46,12 @@
 (defcard-om-next bar-card
   Bar)
 
-;; TODO:
-;; - test `defui` that doesn't implement style
+(defui ComponentWithoutStyle
+  Object
+  (render [this]
+    (dom/div {:id "component-no-style"}
+      "Component Without Style.")))
+
+(defcard-om-next card-component-no-style
+  ComponentWithoutStyle)
+
