@@ -5,7 +5,7 @@
             [clojure.string :as string]
             [garden.core :as garden]))
 
-(def css (atom []))
+(def css (atom {}))
 
 (defn reshape-render
   ([form]
@@ -68,11 +68,14 @@
     reshape-style-form
     first))
 
+(defn- munge-ns-name [ns-name]
+  (string/replace (munge ns-name) #"\." "_"))
+
 (defn- format-class-name [ns-name component-name class-name]
   "generate namespace qualified classname"
   (let [ns-name ns-name
         class-name (name class-name)]
-    (str "." (string/replace (munge ns-name) #"\." "_")
+    (str "." (munge-ns-name ns-name)
       "_" component-name "_" (subs class-name 1))))
 
 ;; styles is the last arg because of thread-last in `defui*`
@@ -102,7 +105,7 @@
         css-str (garden/css component-style)
         forms (reshape-defui forms)
         forms (concat forms (list 'static 'field 'ns ns-name))]
-    (swap! css into [css-str])
+    (swap! css assoc [ns-name name] css-str)
     `(om.next/defui ~name ~@forms)))
 
 (defmacro defui [name & forms]
@@ -123,9 +126,9 @@
     (io/delete-file fname true)
     (add-watch css :watcher
       (fn [k atom old-state new-state]
-        (with-open [out ^java.io.Writer (io/make-writer fname {:append true})]
+        (with-open [out ^java.io.Writer (io/make-writer fname {:append false})]
           (binding [*out* out]
-            (println (nth new-state (-> new-state count dec)))
+            (println (string/join "\n" (vals new-state)))
             (println)))))))
 
 (setup-io!)
