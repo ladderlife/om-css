@@ -123,10 +123,9 @@
                     (butlast)
                     vec
                     (conj default-fname))))]
-    (io/delete-file fname true)
     (add-watch css :watcher
       (fn [k atom old-state new-state]
-        (with-open [out ^java.io.Writer (io/make-writer fname {:append false})]
+        (with-open [out ^java.io.Writer (io/make-writer fname {})]
           (binding [*out* out]
             (println (string/join "\n" (vals new-state)))
             (println)))))))
