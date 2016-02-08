@@ -5,7 +5,7 @@
             [goog.dom :as gdom]
             [om.next :as om]
             [om-css.dom :as dom]
-            [om-css.core :as oc :refer-macros [defui]]))
+            [om-css.core :as oc :refer-macros [defui defcomponent]]))
 
 (def style-1
   {:text-align :center})
@@ -29,10 +29,10 @@
 
 (deftest namespaced-classnames-in-dom
   (testing "classnames are namespace qualified"
-    (let [c (gdom/getElement "ns-test")]
-      (is (not (nil? (gdom/getElementByClass "om_css_devcards_core_Foo_root"))))
-      (is (not (nil? (gdom/getElementByClass "om_css_devcards_core_Foo_section"))))
-      (is (not (nil? (gdom/getElementByClass "preserved")))))))
+    (is (not (nil? (gdom/getElement "ns-test"))))
+    (is (not (nil? (gdom/getElementByClass "om_css_devcards_core_Foo_root"))))
+    (is (not (nil? (gdom/getElementByClass "om_css_devcards_core_Foo_section"))))
+    (is (not (nil? (gdom/getElementByClass "preserved"))))))
 
 (defui Bar
   oc/Style
@@ -67,3 +67,34 @@
 (defcard-om-next card-component-no-static-style
   "Test that Style doesn't need to appear with `static`"
   NotStaticStyleComponent)
+
+(defcomponent defcomponent-example [props children]
+  (dom/div {:class :defcomponent-class}
+    "`defcomponent` example with class `:defcomponent-class`"))
+
+(defcard defcomponent-example-card
+  (js/React.createElement defcomponent-example))
+
+(defcomponent nested-defcomponent-example [props children]
+  (dom/div {:id "nested-defcomponent" :class :nested-defcomponent}
+    "Nested `defcomponent` example"
+    (defcomponent-example {:class :some}
+      "some text")))
+
+(defcard nested-defcomponent-example-card
+  (js/React.createElement nested-defcomponent-example))
+
+(defcomponent defcomponent-with-style [props children]
+  [[:.example-class {:background-color "tomato"}]]
+  (dom/div {:class :example-class}
+    "Nested `defcomponent` example"
+    (defcomponent-example {:class :some}
+      "some text")))
+
+(defcard defcomponent-with-style-card
+  (js/React.createElement defcomponent-with-style))
+
+(deftest namespaced-classnames-in-defcomponent
+  (testing "`defcomponent` with styles"
+    (is (not (nil? (gdom/getElementByClass "om_css_devcards_core_defcomponent-example_defcomponent-class"))))
+    (is (not (nil? (gdom/getElementByClass "om_css_devcards_core_defcomponent-with-style_example-class"))))))

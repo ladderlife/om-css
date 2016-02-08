@@ -2,22 +2,6 @@
   (:refer-clojure :exclude [map meta time])
   (:require [om.dom :as dom]))
 
-;;; defcomponent
-
-(defmacro defcomponent
-  [component-name [props children] & body]
-  "Example usage:
-  (defcomponent foo
-    [props children]
-    (dom/div {:class \"foo\"}
-             children))
-
-  (foo (dom/a {:href \"http://google.com\"}))
-  "
-  (list 'defn component-name '[& params]
-        (concat (list 'let [[props (or children '_)] `(parse-params ~'params)])
-                body)))
-
 ;;; generate all form tags
 
 (def form-tags '[input textarea option])

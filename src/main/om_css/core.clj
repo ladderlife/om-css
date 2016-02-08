@@ -15,8 +15,8 @@
      (if dt
        (let [form (first dt)]
          (if (and (sequential? form) (not (empty? form)))
-           (let [first-form (name (first form))]
-             (if (some #{(symbol  first-form)} dom/all-tags)
+           (let [first-form (name (or (first form) ""))]
+             (if (some #{(symbol first-form)} dom/all-tags)
                (let [[pre post] (split-at 1 form)]
                  (recur (next dt)
                    (conj ret
@@ -111,6 +111,37 @@
 
 (defmacro defui [name & forms]
   (defui* name forms &env))
+
+(defn defcomponent*
+  [env component-name [props children] component-style body]
+  "Example usage:
+  (defcomponent foo
+    [props children]
+    (dom/div {:class \"foo\"}
+             children))
+  (foo (dom/a {:href \"http://google.com\"}))
+  "
+  (let [ns-name (-> env :ns :name str)
+        css-str (when component-style
+                  (garden/css (format-style-classes ns-name
+                                (str component-name)
+                                component-style)))
+        _ (when css-str
+            (swap! css assoc [ns-name component-name] css-str))
+        body (reshape-render body {:ns-name ns-name
+                                   :component-name (str component-name)})]
+    `(defn ~component-name [& params#]
+       (let [[~'_ props# children#] (om-css.dom/parse-params (into [nil] params#))]
+         ~@body))))
+
+(defmacro defcomponent
+  [component-name props&children & [style & rest :as body]]
+  (defcomponent* &env component-name props&children
+    (when (vector? style)
+      style)
+    (if (vector? style)
+      rest
+      body)))
 
 ;; TODO: can we make this not open the file for each atom state change?
 (defn setup-io! []
