@@ -29,6 +29,18 @@ Define components as you might do in Om Next. Implement om-css.core's `Style` pr
           (dom/p {:className "preserved"} "paragraph with class \"preserved\""))))))
 ```
 
+`defcomponent` is syntactic sugar for simple React elements:
+
+```clojure
+;; the styles vector is optional
+(defcomponent element-with-style [props children]
+  [[:.example-class {:background-color "tomato"}]]
+  (dom/div {:class :example-class}
+    "Nested `defcomponent` example"
+    (defcomponent-example {:class :some}
+      "some text")))
+```
+
 Styles written in components are written to a CSS file. You can add an option `:css-output-to` to the Clojurescript compiler with the output path for your styles. [Here](./scripts/figwheel.clj#L15)'s an example.
 
 Check out the file `src/devcards/om_css/devcards/core.cljs` for more examples.
