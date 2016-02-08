@@ -1,4 +1,4 @@
-# CSS in Components [![Clojars Project](https://img.shields.io/clojars/v/com.ladderlife/om-css.svg)](https://clojars.org/com.ladderlife/om-css)
+# CSS in Om Next Components [![Clojars Project](https://img.shields.io/clojars/v/com.ladderlife/om-css.svg)](https://clojars.org/com.ladderlife/om-css)
 
 
 ## How to use it:
@@ -20,8 +20,7 @@ Define components as you might do in Om Next. Implement om-css.core's `Style` pr
   oc/Style
   (style [_]
     [[:.root {:color "#FFFFF"}]
-     [:.section (merge {} ;;style-1
-                  {:background-color :green})]])
+     [:.section {:background-color :green})]])
   Object
   (render [this]
     (dom/div {:id "ns-test"}
