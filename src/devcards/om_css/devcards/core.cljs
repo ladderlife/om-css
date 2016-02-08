@@ -13,7 +13,7 @@
 (defui Foo
   static oc/Style
   (style [_]
-    [[:.root {:color "#FFFFF"}]
+    [[:.root {:background-color "tomato"}]
      [:.section (merge {} ;;style-1
                   {:background-color :green})]])
   Object
@@ -21,7 +21,8 @@
     (dom/div {:id "ns-test"}
       (dom/div {:class :root} "div with class :root"
         (dom/section {:class :section} "section with class :section"
-          (dom/p {:className "preserved"} "paragraph with class \"preserved\""))))))
+          (dom/p {:className "preserved"
+                  :style {:background-color "turquoise"}} "paragraph with class \"preserved\""))))))
 
 (defcard-om-next foo-card
   Foo)
