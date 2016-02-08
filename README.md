@@ -17,7 +17,7 @@ Define components as you might do in Om Next. Implement om-css.core's `Style` pr
 
 ```clojure
 (defui Component
-  static oc/Style
+  oc/Style
   (style [_]
     [[:.root {:color "#FFFFF"}]
      [:.section (merge {} ;;style-1

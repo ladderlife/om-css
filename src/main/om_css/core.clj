@@ -48,7 +48,6 @@
             (recur nil dt')))
         dt'))))
 
-;; TODO: check that Style does not need to be implemented with `static`
 (defn get-style-form [forms]
   (loop [dt forms]
     (when (seq  dt)

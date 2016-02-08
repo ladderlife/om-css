@@ -55,3 +55,15 @@
 (defcard-om-next card-component-no-style
   ComponentWithoutStyle)
 
+(defui NotStaticStyleComponent
+  oc/Style
+  (style [this]
+    {:.somestyle {:background-color "red"}})
+  Object
+  (render [this]
+    (dom/div {:class :somestyle}
+      "Component that implements Style (non-static)")))
+
+(defcard-om-next card-component-no-static-style
+  "Test that Style doesn't need to appear with `static`"
+  NotStaticStyleComponent)
