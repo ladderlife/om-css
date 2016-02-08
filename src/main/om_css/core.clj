@@ -130,8 +130,14 @@
             (swap! css assoc [ns-name component-name] css-str))
         body (reshape-render body {:ns-name ns-name
                                    :component-name (str component-name)})]
+    (when-not (and (symbol? props) (symbol? children))
+      (throw (IllegalArgumentException.
+               (str "Malformed `defcomponent`. Correct syntax: "
+                 "`(defcomponent [props children] "
+                 "[:.optional {:styles :vector}]"
+                 "(dom/element {:some :props} :children))`"))))
     `(defn ~component-name [& params#]
-       (let [[~'_ props# children#] (om-css.dom/parse-params (into [nil] params#))]
+       (let [[~'_ ~'props ~'children] (om-css.dom/parse-params (into [nil] params#))]
          ~@body))))
 
 (defmacro defcomponent
