@@ -98,3 +98,49 @@
   (testing "`defcomponent` with styles"
     (is (not (nil? (gdom/getElementByClass "om_css_devcards_core_defcomponent-example_defcomponent-class"))))
     (is (not (nil? (gdom/getElementByClass "om_css_devcards_core_defcomponent-with-style_example-class"))))))
+
+(defui MultipleClassesDefui
+  static oc/Style
+  (style [_]
+    [[:.some {:background-color "tomato"}]
+     [:.other {:color "yellow"}]])
+  Object
+  (render [this]
+    (dom/div {:id "multiple-classes-test-defui"
+              :class [:some :other]}
+      "div with classes [:some :other]")))
+
+(defcard-om-next defui-multiple-classes
+  "Render a `defui` component with multiple classes"
+  MultipleClassesDefui)
+
+(deftest multiple-classnames-in-defui
+  (testing "`defcomponent` with styles"
+    (let [c (gdom/getElement "multiple-classes-test-defui")
+          cns (.-className c)
+          cns (.split cns " ")]
+      (is (not (nil? c)))
+      (is (= (count cns) 2))
+      (is (= (first cns) "om_css_devcards_core_MultipleClassesDefui_some"))
+      (is (= (second cns) "om_css_devcards_core_MultipleClassesDefui_other")))))
+
+(defcomponent MultipleClassesDefcomponent [props children]
+  [[:.some {:background-color "tomato"}]
+   [:.other {:color "yellow"}]]
+  (dom/div {:id "multiple-classes-test-defcomponent"
+            :class [:some :other]}
+    "div with classes [:some :other]"))
+
+(defcard defcomponent-multiple-classes
+  "Render a `defcomponent` component with multiple classes"
+  (js/React.createElement MultipleClassesDefcomponent))
+ 
+(deftest multiple-classnames-in-defcomponent
+  (testing "`defcomponent` with styles"
+    (let [c (gdom/getElement "multiple-classes-test-defcomponent")
+          cns (.-className c)
+          cns (.split cns " ")]
+      (is (not (nil? c)))
+      (is (= (count cns) 2))
+      (is (= (first cns) "om_css_devcards_core_MultipleClassesDefcomponent_some"))
+      (is (= (second cns) "om_css_devcards_core_MultipleClassesDefcomponent_other")))))

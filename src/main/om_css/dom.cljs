@@ -61,6 +61,11 @@
     (str (string/replace (munge ns-name) #"\." "_")
       "_" component-name "_" class-name)))
 
+(defn format-class-names [this-arg cns]
+  (string/join " "
+    (cljs.core/map #(format-class-name this-arg %)
+      (if (sequential? cns) cns [cns]))))
+
 (defn- format-attrs [this-arg attrs]
   "leaves :className unchanged, formats :class accordingly"
   (->> attrs
@@ -68,7 +73,7 @@
       (fn [[k v]]
         [(format-opt-key k)
          (if (= k :class)
-           (format-class-name this-arg v)
+           (format-class-names this-arg v)
            (format-opt-val v))]))
     (into {})))
 
