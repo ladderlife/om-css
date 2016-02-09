@@ -37,5 +37,5 @@
                   children))))
 
 (defcard omcss-4-card
-  "Test that destructuring works in defcomponent's args"
+  "Test that `let` expressions work in `defcomponent`"
   (omcss-4-component))
