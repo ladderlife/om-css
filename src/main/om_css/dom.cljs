@@ -59,13 +59,14 @@
 
 (defn format-class-names [this-arg cns]
   (string/join " "
-    (cljs.core/map #(format-class-name this-arg %)
+    (cljs.core/map #(cond->> %
+                      (keyword? %) (format-class-name this-arg))
       (if (sequential? cns) cns [cns]))))
 
 (defn- format-attrs [this-arg attrs]
   "leaves :className unchanged, formats :class accordingly"
   (->> attrs
-    (clojure.core/map
+    (cljs.core/map
       (fn [[k v]]
         [(format-opt-key k)
          (if (= k :class)
