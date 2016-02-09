@@ -130,11 +130,13 @@
    [:.other {:color "yellow"}]]
   (dom/div {:id "multiple-classes-test-defcomponent"
             :class [:some :other]}
-    "div with classes [:some :other]"))
+    "div with classes [:some :other]"
+    children))
 
 (defcard defcomponent-multiple-classes
   "Render a `defcomponent` component with multiple classes"
-  (js/React.createElement MultipleClassesDefcomponent))
+  (MultipleClassesDefcomponent nil
+    (dom/div nil "child")))
  
 (deftest multiple-classnames-in-defcomponent
   (testing "`defcomponent` with styles"
