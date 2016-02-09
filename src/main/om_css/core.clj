@@ -92,9 +92,11 @@
          (sequential? %)
          (format-style-classes ns-name component-name %)
 
-         (and (keyword? %)
-           (.startsWith (name %) "."))
+         (and (keyword? %) (.startsWith (name %) "."))
          (format-class-name ns-name component-name %)
+
+         (and (keyword? %) (.startsWith (name %) "$"))
+         (str "." (subs (name %) 1))
 
          :else %))
     (into [])))

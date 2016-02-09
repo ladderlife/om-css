@@ -51,3 +51,17 @@
 (defcard omcss-3-card
   "Test that merging with regular class names works"
   (omcss-3-component))
+
+;;====================
+;; OMCSS-5
+
+(defcomponent omcss-5-component [props children]
+  [:$desktop
+   [:.root {:background-color "tomato"}]]
+  (dom/div {:className "desktop"}
+    (dom/div {:class :root}
+      "test")))
+
+(defcard omcss-5-card
+  "Test that referencing global class names works"
+  (omcss-5-component))
