@@ -16,7 +16,7 @@
        (let [form (first dt)]
          (if (and (sequential? form) (not (empty? form)))
            (let [first-form (name (or (first form) ""))
-                 tag? (some #{(symbol first-form)} ['div 'section 'hr]) ; dom/all-tags
+                 tag? (some #{(symbol first-form)} dom/all-tags)
                  bind? (some #{(-> (str first-form)
                                  (string/split #"-")
                                  first
