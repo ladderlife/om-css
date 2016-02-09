@@ -74,7 +74,7 @@
     "`defcomponent` example with class `:defcomponent-class`"))
 
 (defcard defcomponent-example-card
-  (js/React.createElement defcomponent-example))
+  (defcomponent-example))
 
 (defcomponent nested-defcomponent-example [props children]
   (dom/div {:id "nested-defcomponent" :class :nested-defcomponent}
@@ -83,7 +83,7 @@
       "some text")))
 
 (defcard nested-defcomponent-example-card
-  (js/React.createElement nested-defcomponent-example))
+  (nested-defcomponent-example))
 
 (defcomponent defcomponent-with-style [props children]
   [[:.example-class {:background-color "tomato"}]]
@@ -93,7 +93,7 @@
       "some text")))
 
 (defcard defcomponent-with-style-card
-  (js/React.createElement defcomponent-with-style))
+  (defcomponent-with-style))
 
 (deftest namespaced-classnames-in-defcomponent
   (testing "`defcomponent` with styles"
