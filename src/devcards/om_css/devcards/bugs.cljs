@@ -83,7 +83,7 @@
 
 
 (defcard omcss-7-card
-  "Test that referencing global class names works"
+  "Test that assigning classes to child components works"
   (omcss-7component-2))
 
 (deftest omcss-7-test
