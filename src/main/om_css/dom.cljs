@@ -49,13 +49,9 @@
 
 (defn- format-class-name [this-arg class-name]
   "generate namespace qualified classname"
-  (let [ns-name (if (map? this-arg)
-                  (:ns-name this-arg)
-                  (aget (type this-arg) "ns"))
+  (let [ns-name (:ns-name this-arg)
         class-name (name class-name)
-        component-name (-> (if (map? this-arg)
-                             (:component-name this-arg)
-                             (pr-str (type this-arg)))
+        component-name (-> (:component-name this-arg)
                          (string/split #"/")
                          last)]
     (str (string/replace (munge ns-name) #"\." "_")

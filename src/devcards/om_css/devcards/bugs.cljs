@@ -65,3 +65,37 @@
 (defcard omcss-5-card
   "Test that referencing global class names works"
   (omcss-5-component))
+
+;;====================
+;; OMCSS-7
+
+(defcomponent omcss-7-component-1
+  [{:keys [class] :as props} children]
+  [:.root {:color :purple}]
+  (dom/div
+    {:id "omcss-7" :class (into class [:root])}
+    "class is now [:root :root], parent's class is lost"))
+
+(defcomponent omcss-7component-2
+  [props children]
+  [:.root {:text-decoration :underline}]
+  (omcss-7-component-1 {:class [:root]}))
+
+
+(defcard omcss-7-card
+  "Test that referencing global class names works"
+  (omcss-7component-2))
+
+(deftest omcss-7-test
+  (let [c (gdom/getElement "omcss-7")
+          cns (.-className c)
+          cns (.split cns " ")]
+      (is (not (nil? c)))
+      (is (not (nil?
+                 (some
+                   #{"om_css_devcards_bugs_omcss-7component-2_root"}
+                   cns))))
+      (is (not (nil?
+                 (some
+                   #{"om_css_devcards_bugs_omcss-7-component-1_root"}
+                   cns))))))

@@ -7,36 +7,63 @@
 
 (def css (atom {}))
 
-(defn reshape-render
-  ([form]
-   (reshape-render form nil))
-  ([form this-arg]
-   (loop [dt (seq form) ret [] this-arg this-arg]
-     (if dt
-       (let [form (first dt)]
-         (if (and (sequential? form) (not (empty? form)))
-           (let [first-form (name (or (first form) ""))
-                 tag? (some #{(symbol first-form)} dom/all-tags)
-                 bind? (some #{(-> (str first-form)
-                                 (string/split #"-")
-                                 first
-                                 symbol)}
-                         ;; TODO: does this need to be hardcoded?
-                         ['let 'binding 'when 'if])]
-             (if (or tag? bind?)
-                 (let [[pre post] (split-at (cond-> 1 bind? inc) form)]
-                   (recur (next dt)
-                     (conj ret
-                       (concat pre (when tag? (list this-arg)) (reshape-render post this-arg)))
-                     this-arg))
-                 (recur (next dt) (into ret [form])
-                   (if (vector? form)
-                     (first form)
-                     this-arg))))
-           (recur (next dt) (into ret [form]) this-arg)))
-       (seq ret)))))
+(defn- format-class-name [this-arg class-name]
+  "generate namespace qualified classname"
+  (let [ns-name (:ns-name this-arg)
+        class-name (name class-name)
+        component-name (-> (:component-name this-arg)
+                         (string/split #"/")
+                         last)]
+    (str (string/replace (munge ns-name) #"\." "_")
+      "_" component-name "_" class-name)))
 
-(defn reshape-defui [forms]
+(defn format-class-names [this-arg cns]
+  (if-not (or (vector? cns)
+            (string? cns)
+            (keyword? cns))
+    cns
+    (let [cns' (map #(format-class-name this-arg %)
+                 (if (sequential? cns) cns [cns]))]
+      (if (sequential? cns)
+        (into [] cns')
+        (first cns')))))
+
+(defn reshape-post-elem [form this-arg]
+  (if (map? (first form))
+    (let [attrs (->> (first form)
+                  (map (fn [[k v :as attr]]
+                         (if (= k :class)
+                           [k (format-class-names this-arg v)]
+                           attr)))
+                  (into {}))]
+      (cons attrs (rest form)))
+    form))
+
+(defn reshape-render
+  [form this-arg]
+  (loop [dt (seq form) ret []]
+    (if dt
+      (let [form (first dt)]
+        (if (and (sequential? form) (not (empty? form)))
+          (let [first-form (name (or (first form) ""))
+                tag? (some #{(symbol first-form)} dom/all-tags)
+                bind? (some #{(-> (str first-form)
+                                (string/split #"-")
+                                first
+                                symbol)}
+                        ;; TODO: does this need to be hardcoded?
+                        ['let 'binding 'when 'if])]
+            (let [[pre post] (split-at (cond-> 1 bind? inc) form)
+                  post' (reshape-post-elem post this-arg)]
+              (if (or tag? bind?)
+                (recur (next dt)
+                  (conj ret
+                    (concat pre (when tag? (list this-arg)) (reshape-render post' this-arg))))
+                (recur (next dt) (into ret [(concat pre post')])))))
+          (recur (next dt) (into ret [form]))))
+      (seq ret))))
+
+(defn reshape-defui [forms this-arg]
   (letfn [(split-on-object [forms]
             (split-with (complement '#{Object}) forms))
           (split-on-render [forms]
@@ -49,9 +76,9 @@
               dt' (into dt' pre)]
           (if (seq post)
             (let [[pre [render & post]] (split-on-render obj-forms)
-                  new-render (reshape-render render)]
+                  render' (reshape-render render this-arg)]
               (recur nil (-> (conj dt' sym)
-                           (into (concat pre [new-render] post)))))
+                           (into (concat pre [render'] post)))))
             (recur nil dt')))
         dt'))))
 
@@ -77,7 +104,7 @@
 (defn- munge-ns-name [ns-name]
   (string/replace (munge ns-name) #"\." "_"))
 
-(defn- format-class-name [ns-name component-name class-name]
+(defn- format-garden-class-name [ns-name component-name class-name]
   "generate namespace qualified classname"
   (let [ns-name ns-name
         class-name (name class-name)]
@@ -93,7 +120,7 @@
          (format-style-classes ns-name component-name %)
 
          (and (keyword? %) (.startsWith (name %) "."))
-         (format-class-name ns-name component-name %)
+         (format-garden-class-name ns-name component-name %)
 
          (and (keyword? %) (.startsWith (name %) "$"))
          (str "." (subs (name %) 1))
@@ -112,7 +139,9 @@
                           (format-style-classes ns-name (str name)))
         css-str (when component-style
                   (garden/css component-style))
-        forms (reshape-defui forms)
+        this-arg {:ns-name ns-name
+                  :component-name (str name)}
+        forms (reshape-defui forms this-arg)
         forms (concat forms (list 'static 'field 'ns ns-name))]
     (when css-str
       (swap! css assoc [ns-name name] css-str))
@@ -139,8 +168,9 @@
                                 component-style)))
         _ (when css-str
             (swap! css assoc [ns-name component-name] css-str))
-        body (reshape-render body {:ns-name ns-name
-                                   :component-name (str component-name)})]
+        this-arg {:ns-name ns-name
+                  :component-name (str component-name)}
+        body (reshape-render body this-arg)]
     (when-not (and (vector? args) (= (count args) 2))
       (throw (IllegalArgumentException.
                (str "Malformed `defcomponent`. Correct syntax: "
@@ -148,7 +178,7 @@
                  "[:.optional {:styles :vector}]"
                  "(dom/element {:some :props} :children))`"))))
     `(defn ~component-name [& params#]
-       (let [[~'_ props# children#] (om-css.dom/parse-params (into [nil] params#))
+       (let [[~'_ props# children#] (om-css.dom/parse-params (into [~this-arg] params#))
              ~props props#
              ~children children#]
          ~@body))))
@@ -228,4 +258,17 @@
     '((let [x true]
         (dom/div {:class [:root :active]}
           "div with class root"))))
+
+  (reshape-render
+    '((dom/div {:id "nested-defcomponent"
+                :class :nested-defcomponent}
+        "Nested `defcomponent` example"
+        (defcomponent-example {:class :some} "some text")))
+    {:component-name "FooComp"
+     :ns-name "some-ns.core"})
+
+  (reshape-render
+    '((omcss-7-component-1 {:class [:root]}))
+    {:component-name "FooComp"
+     :ns-name "some-ns.core"})
   )
