@@ -141,8 +141,7 @@
                   (garden/css component-style))
         this-arg {:ns-name ns-name
                   :component-name (str name)}
-        forms (reshape-defui forms this-arg)
-        forms (concat forms (list 'static 'field 'ns ns-name))]
+        forms (reshape-defui forms this-arg)]
     (when css-str
       (swap! css assoc [ns-name name] css-str))
     `(om.next/defui ~name ~@forms)))
