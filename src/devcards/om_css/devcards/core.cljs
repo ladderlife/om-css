@@ -5,7 +5,8 @@
             [goog.dom :as gdom]
             [om.next :as om]
             [om-css.dom :as dom]
-            [om-css.core :as oc :refer-macros [defui defcomponent]]))
+            [om-css.core :as oc :refer-macros [defui defcomponent]]
+            [om-css.devcards.bugs]))
 
 (def style-1
   {:text-align :center})

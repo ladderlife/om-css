@@ -113,7 +113,7 @@
   (defui* name forms &env))
 
 (defn defcomponent*
-  [env component-name [props children] component-style body]
+  [env component-name [props children :as args] component-style body]
   "Example usage:
   (defcomponent foo
     [props children]
@@ -130,14 +130,16 @@
             (swap! css assoc [ns-name component-name] css-str))
         body (reshape-render body {:ns-name ns-name
                                    :component-name (str component-name)})]
-    (when-not (and (symbol? props) (symbol? children))
+    (when-not (and (vector? args) (= (count args) 2))
       (throw (IllegalArgumentException.
                (str "Malformed `defcomponent`. Correct syntax: "
                  "`(defcomponent [props children] "
                  "[:.optional {:styles :vector}]"
                  "(dom/element {:some :props} :children))`"))))
     `(defn ~component-name [& params#]
-       (let [[~'_ ~'props ~'children] (om-css.dom/parse-params (into [nil] params#))]
+       (let [[~'_ props# children#] (om-css.dom/parse-params (into [nil] params#))
+             ~props props#
+             ~children children#]
          ~@body))))
 
 (defmacro defcomponent
