@@ -115,12 +115,14 @@
 (defn defcomponent*
   [env component-name [props children :as args] component-style body]
   "Example usage:
-  (defcomponent foo
-    [props children]
-    (dom/div {:class \"foo\"}
-             children))
-  (foo (dom/a {:href \"http://google.com\"}))
-  "
+   (defcomponent foo
+     [props children]
+     ;; optional styles vector
+     [[:.foo {:color :green}]
+     (dom/div {:class :foo}
+              children))
+   (foo (dom/a {:href \"http://google.com\"}))
+   "
   (let [ns-name (-> env :ns :name str)
         css-str (when component-style
                   (garden/css (format-style-classes ns-name
