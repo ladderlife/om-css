@@ -39,3 +39,15 @@
 (defcard omcss-4-card
   "Test that `let` expressions work in `defcomponent`"
   (omcss-4-component))
+
+;;====================
+;; OMCSS-3
+
+(defcomponent omcss-3-component [props children]
+  [[:.root {:color :red}]]
+  (dom/div {:class :root :class-name "inline-block"}
+    "test"))
+
+(defcard omcss-3-card
+  "Test that merging with regular class names works"
+  (omcss-3-component))

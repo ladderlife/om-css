@@ -75,7 +75,10 @@
          (if (= k :class)
            (format-class-names this-arg v)
            (format-opt-val v))]))
-    (into {})))
+    (reduce (fn [m [k v]]
+              (if (= k :className)
+                (assoc m k (str (m k "") (str " " v)))
+                (assoc m k v))) {})))
 
 (defn format-opts
   "Returns JavaScript object for React DOM attributes from opts map"
