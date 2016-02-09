@@ -9,7 +9,7 @@
                  [org.omcljs/om "1.0.0-alpha30"]
                  [garden "1.3.0"]
 
-                 [figwheel-sidecar "0.5.0-4" :scope "test"]
+                 [figwheel-sidecar "0.5.0-6" :scope "test"]
                  [devcards "0.2.1-6" :scope "test"]
                  [devcards-om-next "0.1.1" :scope "test"]]
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
