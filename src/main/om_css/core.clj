@@ -15,17 +15,24 @@
      (if dt
        (let [form (first dt)]
          (if (and (sequential? form) (not (empty? form)))
-           (let [first-form (name (or (first form) ""))]
-             (if (some #{(symbol first-form)} dom/all-tags)
-               (let [[pre post] (split-at 1 form)]
-                 (recur (next dt)
-                   (conj ret
-                     (concat pre (list this-arg) (reshape-render post this-arg)))
-                   this-arg))
-               (recur (next dt) (into ret [form])
-                 (if (vector? form)
-                   (first form)
-                   this-arg))))
+           (let [first-form (name (or (first form) ""))
+                 tag? (some #{(symbol first-form)} ['div 'section 'hr]) ; dom/all-tags
+                 bind? (some #{(-> (str first-form)
+                                 (string/split #"-")
+                                 first
+                                 symbol)}
+                         ;; TODO: does this need to be hardcoded?
+                         ['let 'binding 'when 'if])]
+             (if (or tag? bind?)
+                 (let [[pre post] (split-at (cond-> 1 bind? inc) form)]
+                   (recur (next dt)
+                     (conj ret
+                       (concat pre (when tag? (list this-arg)) (reshape-render post this-arg)))
+                     this-arg))
+                 (recur (next dt) (into ret [form])
+                   (if (vector? form)
+                     (first form)
+                     this-arg))))
            (recur (next dt) (into ret [form]) this-arg)))
        (seq ret)))))
 
@@ -214,4 +221,9 @@
     '(style [_]
        [:root {:color "#FFFFF"}
         :section (merge {} {:background-color :green})]))
+
+  (reshape-render
+    '((let [x true]
+        (dom/div {:class [:root :active]}
+          "div with class root"))))
   )

@@ -18,3 +18,24 @@
 (defcard omcss-2-card
   "Test that destructuring works in defcomponent's args"
   (omcss-2-component {:a 1 :b 2}))
+
+;;====================
+;; OMCSS-4
+
+(defcomponent omcss-4-component
+  [props children]
+  [[:.root {:color :purple}]
+   [:.active {:font-weight :bold}]
+   [:.section {:color :green}]]
+  (let [x true]
+    (dom/div
+     {:class [:root :active]}
+     "div with class root"
+     (dom/hr)
+     (dom/section {:class :section}
+                  "section with class :section"
+                  children))))
+
+(defcard omcss-4-card
+  "Test that destructuring works in defcomponent's args"
+  (omcss-4-component))
