@@ -74,7 +74,7 @@
            (format-opt-val v))]))
     (reduce (fn [m [k v]]
               (if (= k :className)
-                (assoc m k (str (m k "") (str " " v)))
+                (assoc m k (string/trim  (str (m k "") (str " " v))))
                 (assoc m k v))) {})))
 
 (defn format-opts
