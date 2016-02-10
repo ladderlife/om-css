@@ -70,17 +70,15 @@
             (split-with
               (complement #('#{render} (first %)))
               forms))]
-    (loop [dt (seq forms) dt' []]
-      (if dt
-        (let [[pre [sym & obj-forms :as post]] (split-on-object dt)
-              dt' (into dt' pre)]
-          (if (seq post)
-            (let [[pre [render & post]] (split-on-render obj-forms)
-                  render' (reshape-render render this-arg)]
-              (recur nil (-> (conj dt' sym)
-                           (into (concat pre [render'] post)))))
-            (recur nil dt')))
-        dt'))))
+    (when (seq forms)
+      (let [[pre [sym & obj-forms :as post]] (split-on-object forms)
+            ret (into [] pre)]
+        (if (seq post)
+          (let [[pre [render & post]] (split-on-render obj-forms)]
+            (into (conj ret sym)
+              (concat pre [(reshape-render render this-arg)]
+                post)))
+          ret)))))
 
 (defn get-style-form [forms]
   (loop [dt forms]
