@@ -49,44 +49,62 @@
                                    :ns-name "ns.core"}
                       :class ["ns_core_Foo_root"]}))))))
 
-(comment
-  (reshape-defui
-    '(om/IQuery
-        (query [this])
-      om/Ident
-      (ident [this])
-      Object
-      (componentWillMount [this])
-      (render [dia]
-        (dom/div nil (dom/div nil "3")))
-      static field a 3
-      static om/IQuery
-      (query [this] [:a])))
+(deftest test-get-style
+  (let [form '(static om/IQuery
+               (query [this])
+               static oc/Style
+               (style [_]
+                 [:root {:color "#FFFFF"}
+                  :section {:background-color :green}])
+               static om/Ident
+               (ident [this])
+               Object
+               (render [this])
+               static om/IQueryParams
+               (params [this]))]
+    (is (= (oc/get-style-form form)
+          '(style [_]
+            [:root {:color "#FFFFF"}
+             :section {:background-color :green}])))
+    (is (nil? (oc/get-style-form
+                '(Object
+                   (render [this])
+                   static om/Ident
+                   (ident [this])))))
+    (is (= (oc/get-component-style form)
+          [:root {:color "#FFFFF"}
+           :section {:background-color :green}]))))
 
-  (get-component-style
-    '(static om/IQuery
-      (query [this])
-      static oc/Style
-      (style [_]
-        [:root {:color "#FFFFF"}
-         :section (merge {} ;;css/default-section
-                    {:background-color :green})])
-     static om/Ident
-     (ident [this])
-     Object
-     (render [this])
-     static om/IQueryParams
-     (params [this])))
-
-  (get-style-form
-    '(Object
-      (render [this])
-      static om/Ident
-      (ident [this])))
-
-  (reshape-style-form
-    '(style [_]
-       [:root {:color "#FFFFF"}
-        :section (merge {} {:background-color :green})]))
-
-  )
+(deftest test-reshape-defui
+  (let [form '(om/IQuery
+                (query [this])
+                om/Ident
+                (ident [this])
+                Object
+                (componentWillMount [this])
+                (render [dia]
+                  (dom/div {:class :foo} (dom/div nil "3")))
+                static field a 3
+                static om/IQuery
+                (query [this] [:a]))
+        expected '[om/IQuery
+                   (query [this])
+                   om/Ident
+                   (ident [this])
+                   Object
+                   (componentWillMount [this])
+                   (render [dia]
+                     (dom/div
+                       {:class "ns_core_Foo_foo"
+                        :omcss$this {:component-name "Foo"
+                                     :ns-name "ns.core"}}
+                       (dom/div nil "3")))
+                   static field a 3
+                   static om/IQuery
+                   (query [this] [:a])]]
+    (is (= (oc/reshape-defui form component-info)
+          expected))
+    (is (= (oc/reshape-defui
+             '(Object (render [this] (dom/div nil "foo")))
+             component-info)
+          '[Object (render [this] (dom/div nil "foo"))]))))
