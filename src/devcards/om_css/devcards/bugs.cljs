@@ -4,6 +4,7 @@
   (:require [devcards-om-next.core :as don :refer-macros [defcard-om-next]]
             [goog.dom :as gdom]
             [om.next :as om]
+            [om.dom :as om-dom]
             [om-css.dom :as dom]
             [om-css.core :as oc :refer-macros [defui defcomponent]]))
 
@@ -99,3 +100,12 @@
                  (some
                    #{"om_css_devcards_bugs_omcss-7-component-1_root"}
                    cns))))))
+
+;;====================
+;; OMCSS-8
+
+(defcomponent omcss-8-component [props children]
+  (om-dom/div #js {:className "test"} "test"))
+
+(defcard omcss-8-card
+  (omcss-8-component))

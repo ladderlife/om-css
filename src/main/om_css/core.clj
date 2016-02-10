@@ -30,15 +30,17 @@
 
 (defn reshape-post-elem [form this-arg]
   (if (map? (first form))
-    (let [attrs (->> (first form)
+    (let [props (->> (first form)
                   (map (fn [[k v :as attr]]
                          (if (= k :class)
                            [k (format-class-names this-arg v)]
                            attr)))
-                  (into {}))]
-      (cons attrs (rest form)))
+                  (into {}))
+          props' (assoc props :omcss$this this-arg)]
+      (cons props' (rest form)))
     form))
 
+;; TODO: this function can be cleaned up since we're no longer attaching `this-arg`
 (defn reshape-render
   [form this-arg]
   (loop [dt (seq form) ret []]
@@ -58,7 +60,7 @@
               (if (or tag? bind?)
                 (recur (next dt)
                   (conj ret
-                    (concat pre (when tag? (list this-arg)) (reshape-render post' this-arg))))
+                    (concat pre (reshape-render post' this-arg))))
                 (recur (next dt) (into ret [(concat pre post')])))))
           (recur (next dt) (into ret [form]))))
       (seq ret))))
@@ -177,7 +179,7 @@
                  "[:.optional {:styles :vector}]"
                  "(dom/element {:some :props} :children))`"))))
     `(defn ~component-name [& params#]
-       (let [[~'_ props# children#] (om-css.dom/parse-params (into [~this-arg] params#))
+       (let [[props# children#] (om-css.dom/parse-params params#)
              ~props props#
              ~children children#]
          ~@body))))
@@ -256,7 +258,9 @@
   (reshape-render
     '((let [x true]
         (dom/div {:class [:root :active]}
-          "div with class root"))))
+          "div with class root")))
+    {:component-name "FooComp"
+     :ns-name "some-ns.core"})
 
   (reshape-render
     '((dom/div {:id "nested-defcomponent"

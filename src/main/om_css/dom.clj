@@ -13,6 +13,6 @@
   `(do
      ~@(clojure.core/map
          (fn [tag]
-           `(defn ~tag [~'this & ~'params]
-              (apply render-elem ~(symbol "om.dom" (name tag)) ~'this ~'params)))
+           `(defn ~tag [& ~'params]
+              (apply render-elem ~(symbol "om.dom" (name tag)) ~'params)))
          all-tags)))

@@ -63,14 +63,14 @@
                       (keyword? %) (format-class-name this-arg))
       (if (sequential? cns) cns [cns]))))
 
-(defn- format-attrs [this-arg attrs]
+(defn- format-attrs [attrs]
   "leaves :className unchanged, formats :class accordingly"
   (->> attrs
     (cljs.core/map
       (fn [[k v]]
         [(format-opt-key k)
          (if (= k :class)
-           (format-class-names this-arg v)
+           (format-class-names (:omcss$this attrs) v)
            (format-opt-val v))]))
     (reduce (fn [m [k v]]
               (if (= k :className)
@@ -79,26 +79,25 @@
 
 (defn format-opts
   "Returns JavaScript object for React DOM attributes from opts map"
-  [this-arg opts]
+  [opts]
   (if (map? opts)
     (->> opts
-      (format-attrs this-arg)
+      format-attrs
       clj->js)
     opts))
 
 (defn parse-params
-  [[this-arg & params]]
-  (let [params' (update
-                  (if (map? (first params))
-                    [(first params) (rest params)]
-                    [nil params])
-                  1 flatten)]
-    (into [this-arg] params')))
+  [params]
+  (update
+    (if (map? (first params))
+      [(first params) (rest params)]
+      [nil params])
+    1 flatten))
 
 (defn render-elem
   [render & params]
-  (let [[this-arg attrs children] (parse-params params)]
-    (apply render (format-opts this-arg attrs) children)))
+  (let [[attrs children] (parse-params params)]
+    (apply render (format-opts attrs) children)))
 
 (gen-tag-fns)
 
