@@ -40,28 +40,26 @@
       (cons props' (rest form)))
     form))
 
-;; TODO: this function can be cleaned up since we're no longer attaching `this-arg`
 (defn reshape-render
   [form this-arg]
   (loop [dt (seq form) ret []]
     (if dt
       (let [form (first dt)]
         (if (and (sequential? form) (not (empty? form)))
-          (let [first-form (name (or (first form) ""))
+          (let [first-form (name (first form))
                 tag? (some #{(symbol first-form)} dom/all-tags)
                 bind? (some #{(-> (str first-form)
                                 (string/split #"-")
                                 first
                                 symbol)}
                         ;; TODO: does this need to be hardcoded?
-                        ['let 'binding 'when 'if])]
-            (let [[pre post] (split-at (cond-> 1 bind? inc) form)
-                  post' (reshape-post-elem post this-arg)]
-              (if (or tag? bind?)
-                (recur (next dt)
-                  (conj ret
-                    (concat pre (reshape-render post' this-arg))))
-                (recur (next dt) (into ret [(concat pre post')])))))
+                        ['let 'binding 'when 'if])
+                [pre post] (split-at (cond-> 1 bind? inc) form)]
+            (recur (next dt)
+              (into ret
+                [(concat pre
+                   (cond-> (reshape-post-elem post this-arg)
+                     (or tag? bind?) (reshape-render this-arg)))])))
           (recur (next dt) (into ret [form]))))
       (seq ret))))
 
