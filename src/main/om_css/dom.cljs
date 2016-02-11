@@ -75,7 +75,8 @@
     (reduce (fn [m [k v]]
               (if (= k :className)
                 (assoc m k (string/trim  (str (m k "") (str " " v))))
-                (assoc m k v))) {})))
+                (cond-> m
+                  (not= k :omcss$this) (assoc k v)))) {})))
 
 (defn format-opts
   "Returns JavaScript object for React DOM attributes from opts map"

@@ -176,7 +176,7 @@
                  "(dom/element {:some :props} :children))`"))))
     `(defn ~component-name [& params#]
        (let [[props# children#] (om-css.dom/parse-params params#)
-             ~props props#
+             ~props (dissoc  props# :omcss$this)
              ~children children#]
          ~@body))))
 
