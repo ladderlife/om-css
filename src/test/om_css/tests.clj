@@ -47,7 +47,29 @@
               component-info)
           '((dom/div {:omcss$this {:component-name "Foo"
                                    :ns-name "ns.core"}
-                      :class ["ns_core_Foo_root"]}))))))
+                      :class ["ns_core_Foo_root"]})))))
+  (testing "`reshape-render` skips `let` bindings"
+    (let [form '((let [x true]
+                    (dom/div
+                      {:class [:root :active]}
+                      "div with class root"
+                      (dom/hr)
+                      (dom/section {:class :section}
+                        "section with class :section"
+                        children))))]
+      (is (= (oc/reshape-render form component-info)
+            '((let [x true]
+                 (dom/div
+                   {:class ["ns_core_Foo_root" "ns_core_Foo_active"]
+                    :omcss$this {:component-name "Foo"
+                                 :ns-name "ns.core"}}
+                   "div with class root"
+                   (dom/hr)
+                   (dom/section {:class "ns_core_Foo_section"
+                                 :omcss$this {:component-name "Foo"
+                                              :ns-name "ns.core"}}
+                     "section with class :section"
+                     children)))))))))
 
 (deftest test-get-style
   (let [form '(static om/IQuery
@@ -108,3 +130,19 @@
              '(Object (render [this] (dom/div nil "foo")))
              component-info)
           '[Object (render [this] (dom/div nil "foo"))]))))
+
+(deftest omcss-11
+  (let [form1 '((dom/div (merge props {:class :root})
+                  "purple"))
+        form2 '((dom/div (merge {:class :root} props) "purple"))]
+    (is (= (oc/reshape-render form1 component-info)
+          '((dom/div (merge props {:omcss$this {:component-name "Foo"
+                                                :ns-name "ns.core"}
+                                   :class "ns_core_Foo_root"})
+              "purple"))))
+    (is (= (oc/reshape-render form2 component-info)
+          '((dom/div (merge {:omcss$this {:component-name "Foo"
+                                          :ns-name "ns.core"}
+                             :class "ns_core_Foo_root"}
+                       props)
+              "purple"))))))

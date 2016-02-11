@@ -28,17 +28,23 @@
         (into [] cns')
         (first cns')))))
 
-(defn reshape-post-elem [form this-arg]
-  (if (map? (first form))
-    (let [props (->> (first form)
+(defn reshape-props [props this-arg]
+  (cond
+    (map? props)
+    (let [props' (->> props
                   (map (fn [[k v :as attr]]
                          (if (= k :class)
                            [k (format-class-names this-arg v)]
                            attr)))
-                  (into {}))
-          props' (assoc props :omcss$this this-arg)]
-      (cons props' (rest form)))
-    form))
+                  (into {:omcss$this this-arg}))]
+      props')
+
+    (list? props)
+    (let [[pre post] (split-with (complement map?) props)
+          props' (concat pre (doall (map #(reshape-props % this-arg) post)))]
+      props')
+
+    :else props))
 
 (defn reshape-render
   [form this-arg]
@@ -54,14 +60,18 @@
                                 symbol)}
                         ;; TODO: does this need to be hardcoded?
                         ['let 'binding 'when 'if])
-                [pre post] (split-at (cond-> 1 bind? inc) form)]
+                [[sym props :as pre] post] (split-at 2 form)
+                props' (reshape-props props this-arg)
+                pre' (if (= (count pre) 2)
+                       (list sym props')
+                       (list sym))]
             (recur (next dt)
               (into ret
-                [(concat pre
-                   (cond-> (reshape-post-elem post this-arg)
+                [(concat pre'
+                   (cond-> post
                      (or tag? bind?) (reshape-render this-arg)))])))
           (recur (next dt) (into ret [form]))))
-      (seq ret))))
+      ret)))
 
 (defn reshape-defui [forms this-arg]
   (letfn [(split-on-object [forms]
