@@ -116,8 +116,8 @@
 (defcomponent omcss-11-component [props children]
   [[:.root {:color :purple}]]
   (dom/div
-   (merge props {:class :root})
-   "purple"))
- 
+    (merge props {:class :root})
+    "purple"))
+
 (defcard omcss-11-card
   (omcss-11-component))
