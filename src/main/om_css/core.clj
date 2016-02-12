@@ -1,6 +1,7 @@
 (ns om-css.core
   (:require [om-css.dom :as dom]
             [cljs.analyzer.api :as ana-api]
+            [cljs.env :as env]
             [clojure.java.io :as io]
             [clojure.string :as string]
             [garden.core :as garden]))
@@ -201,7 +202,9 @@
 
 ;; TODO: can we make this not open the file for each atom state change?
 (defn setup-io! []
-  (let [opts (ana-api/get-options)
+  (let [opts (some-> env/*compiler*
+               deref
+               :options)
         default-fname "out.css"
         fname (or (:css-output-to opts)
                 (str (:output-dir opts) default-fname)
