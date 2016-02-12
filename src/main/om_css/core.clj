@@ -143,8 +143,9 @@
 (defn defui* [name forms env]
   (let [ns-name (-> env :ns :name str)
         component-style (some->> (get-component-style forms)
-                          (str "(clojure.core/refer 'clojure.core)")
-                          load-string
+                          (list '(clojure.core/refer 'clojure.core))
+                          (cons 'do)
+                          eval
                           (format-style-classes ns-name (str name)))
         css-str (when component-style
                   (garden/css component-style))
