@@ -4,7 +4,9 @@
             [cljs.env :as env]
             [clojure.java.io :as io]
             [clojure.string :as string]
-            [garden.core :as garden]))
+            [clojure.set :as set]
+            [garden.core :as garden])
+  (:import (java.io FileNotFoundException)))
 
 (def css (atom {}))
 
@@ -120,13 +122,12 @@
     (str "." (munge-ns-name ns-name)
       "_" component-name "_" (subs class-name 1))))
 
-;; styles is the last arg because of thread-last in `defui*`
-(defn format-style-classes [ns-name component-name styles]
+(defn format-style-classes [styles ns-name component-name]
   (->> styles
     (clojure.core/map
       #(cond
          (sequential? %)
-         (format-style-classes ns-name component-name %)
+         (format-style-classes % ns-name component-name)
 
          (and (keyword? %) (.startsWith (name %) "."))
          (format-garden-class-name ns-name component-name %)
@@ -137,21 +138,63 @@
          :else %))
     (into [])))
 
-;; TODO: runtime evaluation to support vars and fns
-;; currently `load-string` fails if the style contains a var/function
-;; call outside the scope of clojure.core
+(defn infer-requires [{env-ns :ns :as env} forms]
+  (letfn [(split-on-symbol [form]
+            (split-with (complement symbol?) form))]
+    (loop [dt (seq forms) ret []]
+      (if dt
+        (let [form (first dt)]
+          (cond
+            (sequential? form)
+            (recur (next dt) (into ret (infer-requires env form)))
+
+            (symbol? form)
+            (let [ns (some-> (namespace form) symbol)
+                  req (some->> ns
+                        (get (:requires env-ns)))]
+              (if req
+                ;; look in requires
+                (recur (next dt)
+                  (conj ret `(~'require '[~req :as ~ns])))
+                (if-not (nil? (re-find #"clojure.core/" (str (resolve form))))
+                  ;; clojure function / var
+                  (recur (next dt) ret)
+                  (do
+                    (let [sym-ns (some-> env-ns :defs form :name namespace symbol)]
+                      (if (= sym-ns (-> env-ns :name))
+                        (recur (next dt) (conj ret `(~'use '~sym-ns)))
+                        (recur (next dt) ret)))))))
+            :else (recur (next dt) ret)))
+        ret))))
+
+(defn eval-component-style [style env]
+  (let [ns-name (-> env :ns :name str)
+        requires (cons '(clojure.core/refer 'clojure.core)
+                   (infer-requires env style))]
+    (try
+      (some->> style
+        list
+        (concat requires)
+        (cons 'do)
+        eval)
+      (catch FileNotFoundException e
+        (throw (IllegalArgumentException.
+                 "Constants must be in a .cljs file."))))))
+
 (defn defui* [name forms env]
   (let [ns-name (-> env :ns :name str)
-        component-style (some->> (get-component-style forms)
-                          (list '(clojure.core/refer 'clojure.core))
-                          (cons 'do)
-                          eval
-                          (format-style-classes ns-name (str name)))
+        component-name (str name)
+        component-style (-> forms
+                          get-component-style
+                          (eval-component-style env)
+                          (format-style-classes ns-name component-name))
         css-str (when component-style
                   (garden/css component-style))
         this-arg {:ns-name ns-name
                   :component-name (str name)}
-        forms (reshape-defui forms this-arg)]
+        forms (reshape-defui forms this-arg)
+        asd (str (-> env :ns :requires))
+        asd (str (:ns env))]
     (when css-str
       (swap! css assoc [ns-name name] css-str))
     `(om.next/defui ~name ~@forms)))
@@ -160,7 +203,7 @@
   (defui* name forms &env))
 
 (defn defcomponent*
-  [env component-name [props children :as args] component-style body]
+  [env name [props children :as args] component-style body]
   "Example usage:
    (defcomponent foo
      [props children]
@@ -170,31 +213,33 @@
               children))
    (foo (dom/a {:href \"http://google.com\"}))
    "
+  (when-not (and (vector? args) (= (count args) 2))
+    (throw (IllegalArgumentException.
+             (str "Malformed `defcomponent`. Correct syntax: "
+               "`(defcomponent [props children] "
+               "[:.optional {:styles :vector}]"
+               "(dom/element {:some :props} :children))`"))))
   (let [ns-name (-> env :ns :name str)
-        css-str (when component-style
-                  (garden/css (format-style-classes ns-name
-                                (str component-name)
-                                component-style)))
-        _ (when css-str
-            (swap! css assoc [ns-name component-name] css-str))
+        component-name (str name)
+        component-style' (some-> component-style
+                           (eval-component-style env)
+                           (format-style-classes ns-name component-name))
+        css-str (some-> component-style'
+                  garden/css)
         this-arg {:ns-name ns-name
-                  :component-name (str component-name)}
+                  :component-name component-name}
         body (reshape-render body this-arg)]
-    (when-not (and (vector? args) (= (count args) 2))
-      (throw (IllegalArgumentException.
-               (str "Malformed `defcomponent`. Correct syntax: "
-                 "`(defcomponent [props children] "
-                 "[:.optional {:styles :vector}]"
-                 "(dom/element {:some :props} :children))`"))))
-    `(defn ~component-name [& params#]
+    (when css-str
+      (swap! css assoc [ns-name name] css-str))
+    `(defn ~name [& params#]
        (let [[props# children#] (om-css.dom/parse-params params#)
              ~props (dissoc  props# :omcss$this)
              ~children children#]
          ~@body))))
 
 (defmacro defcomponent
-  [component-name props&children & [style & rest :as body]]
-  (defcomponent* &env component-name props&children
+  [name props&children & [style & rest :as body]]
+  (defcomponent* &env name props&children
     (when (vector? style)
       style)
     (if (vector? style)

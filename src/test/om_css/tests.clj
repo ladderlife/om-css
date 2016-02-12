@@ -131,6 +131,24 @@
              component-info)
           '[Object (render [this] (dom/div nil "foo"))]))))
 
+(deftest test-infer-requires
+  (let [forms '[[:.root {:background-color "tomato"}]
+                [:.section (merge c/style-1 {:background-color :green})]]
+        forms2 '[[:.root (merge o/style-2 {:background-color "tomato"})]
+                [:.section (merge c/style-1 {:background-color :green})]]
+        forms3 '[:$desktop
+                 [:.root (merge c/style-1 {:background-color "tomato"})]]
+        env '{:ns {:name ns.core
+                   :requires {c ns.constants
+                              o ns.other}}}]
+    (is (= (oc/infer-requires env forms)
+          '[(require '[ns.constants :as c])]))
+    (is (= (oc/infer-requires env forms2)
+          '[(require '[ns.other :as o])
+            (require '[ns.constants :as c])]))
+    (is (= (oc/infer-requires env forms3)
+          '[(require '[ns.constants :as c])]))))
+
 (deftest omcss-11
   (let [form1 '((dom/div (merge props {:class :root})
                   "purple"))

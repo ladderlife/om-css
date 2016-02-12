@@ -6,7 +6,8 @@
             [om.next :as om]
             [om.dom :as om-dom]
             [om-css.dom :as dom]
-            [om-css.core :as oc :refer-macros [defui defcomponent]]))
+            [om-css.core :as oc :refer-macros [defui defcomponent]]
+            [om-css.devcards.constants :as c]))
 
 ;;====================
 ;; OMCSS-2
@@ -121,3 +122,20 @@
 
 (defcard omcss-11-card
   (omcss-11-component))
+
+;;====================
+;; OMCSS-12
+
+(defui Foo
+   static oc/Style
+   (style [_]
+     [[:.root {:background-color "tomato"}]
+      [:.section (merge c/some-style
+                   {:background-color :green})]])
+   Object
+   (render [this]
+     (dom/div {:class :root} "div with class :root"
+       (dom/section {:class :section} "section with class :section"))))
+
+(defcard-om-next omcss-12-card
+   Foo)
