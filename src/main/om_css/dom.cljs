@@ -46,12 +46,6 @@
     (map? opt-val) (format-opts opt-val)
     :else opt-val))
 
-(defn format-class-names [component-info cns]
-  (->> (if (sequential? cns) cns [cns])
-    (cljs.core/map #(cond->> %
-          (keyword? %) (utils/format-class-name component-info)))
-    (string/join " ")))
-
 (defn- format-attrs [attrs]
   "leaves :className unchanged, formats :class accordingly"
   (->> attrs
@@ -59,7 +53,7 @@
       (fn [[k v]]
         [(format-opt-key k)
          (if (= k :class)
-           (format-class-names (:omcss$info attrs) v)
+           (utils/format-class-names (:omcss$info attrs) v)
            (format-opt-val v))]))
     (reduce (fn [m [k v]]
               (if (= k :className)

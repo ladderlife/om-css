@@ -10,24 +10,13 @@
 
 (def css (atom {}))
 
-(defn format-class-names [component-info cns]
-  (if-not (or (vector? cns)
-            (string? cns)
-            (keyword? cns))
-    cns
-    (let [cns' (map #(utils/format-class-name component-info %)
-                 (if (sequential? cns) cns [cns]))]
-      (if (sequential? cns)
-        (into [] cns')
-        (first cns')))))
-
 (defn reshape-props [props component-info]
   (cond
     (map? props)
     (let [props' (->> props
                   (map (fn [[k v :as attr]]
                          (if (= k :class)
-                           [k (format-class-names component-info v)]
+                           [k (utils/format-class-names component-info v)]
                            attr)))
                   (into {:omcss$info component-info}))]
       props')
