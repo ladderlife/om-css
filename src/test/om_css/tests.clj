@@ -1,6 +1,7 @@
 (ns om-css.tests
   (:require [clojure.test :refer [deftest testing is are]]
-            [om-css.core :as oc]))
+            [om-css.core :as oc]
+            [om-css.utils :as utils]))
 
 (def component-info
   {:component-name "Foo"
@@ -164,3 +165,27 @@
                              :class "ns_core_Foo_root"}
                        props)
               "purple"))))))
+
+(deftest test-reshape-props
+  (are [props res] (= (oc/reshape-props props component-info) res)
+    '(merge {:class "foo"}) '(merge {:omcss$info {:ns-name "ns.core"
+                                                  :component-name "Foo"}
+                                     :class "ns_core_Foo_foo"})
+    {:class "foo"} {:omcss$info {:ns-name "ns.core"
+                                 :component-name "Foo"}
+                    :class "ns_core_Foo_foo"}
+    {:class :foo} {:omcss$info {:ns-name "ns.core"
+                                :component-name "Foo"}
+                   :class "ns_core_Foo_foo"}
+    ;; TODO: is this intended behavior?
+    '(merge {:class (subs (str :foo) 1)})'(merge {:omcss$info {:ns-name "ns.core"
+                                                               :component-name "Foo"}
+                                                  :class (subs (str :foo) 1)})))
+
+(deftest test-format-class-names
+  (are [cns res] (= (utils/format-class-names component-info cns) res)
+    :foo "ns_core_Foo_foo"
+    "foo" "ns_core_Foo_foo"
+    [:foo] ["ns_core_Foo_foo"]
+    ["foo"] ["ns_core_Foo_foo"]
+    ["foo" :bar] ["ns_core_Foo_foo" "ns_core_Foo_bar"]))
