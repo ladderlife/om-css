@@ -158,7 +158,7 @@
         eval)
       (catch FileNotFoundException e
         (throw (IllegalArgumentException.
-                 "Constants must be in a .cljs file."))))))
+                 "Constants must be in a .cljc file."))))))
 
 (defn defui* [name forms env]
   (let [ns-name (-> env :ns :name str)
