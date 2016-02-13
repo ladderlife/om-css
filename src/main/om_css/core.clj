@@ -193,8 +193,8 @@
         this-arg {:ns-name ns-name
                   :component-name (str name)}
         forms (reshape-defui forms this-arg)
-        asd (str (-> env :ns :requires))
-        asd (str (:ns env))]
+        name (cond-> name
+               (-> name meta :once) (vary-meta assoc :once true))]
     (when css-str
       (swap! css assoc [ns-name name] css-str))
     `(om.next/defui ~name ~@forms)))

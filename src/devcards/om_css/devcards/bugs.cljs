@@ -126,7 +126,7 @@
 ;;====================
 ;; OMCSS-12
 
-(defui Foo
+(defui ^:once Foo
    static oc/Style
    (style [_]
      [[:.root {:background-color "tomato"}]
