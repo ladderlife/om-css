@@ -8,8 +8,8 @@
 
 (deftest test-format-class-name
   (are [cn res] (= (utils/format-class-name component-info cn) res)
-       :foo "ns_core_Foo_foo"
-       "foo" "ns_core_Foo_foo")
+    :foo "ns_core_Foo_foo"
+    "foo" "ns_core_Foo_foo")
   (is (= (utils/format-class-name
            {:ns-name "ns.core"
             :component-name "ns.core/Foo"}
