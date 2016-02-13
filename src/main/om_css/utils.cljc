@@ -20,17 +20,16 @@
                     (keyword? cns))
             cns
             (let [cns' (map #(format-class-name component-info %)
-                         cns)]
+                         (if (sequential? cns) cns [cns]))]
               (if (sequential? cns)
                 (into [] cns')
                 (first cns'))))
      ;; only transform keywords at runtime, vectors and strings have
      ;; already been prefixed at macro-expansion time
-     :cljs (->> cns
+     :cljs (->> (if (sequential? cns) cns [cns])
              (map #(cond->> %
                      (keyword? %) (format-class-name component-info)))
              (string/join " "))))
 
 (defn format-class-names [component-info cns]
-  (let [cns (if (sequential? cns) cns [cns])]
-    (format-cns* component-info cns)))
+  (format-cns* component-info cns))
