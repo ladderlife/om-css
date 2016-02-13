@@ -192,7 +192,10 @@
               children))
    (foo (dom/a {:href \"http://google.com\"}))
    "
-  (when-not (and (vector? args) (= (count args) 2))
+  (when-not (and (vector? args) (= (count args) 2)
+              ;; arguments are vectors or destructuring maps
+              (or (symbol? (first args)) (map? (first args)))
+              (or (symbol? (second args)) (map? (second args))))
     (throw (IllegalArgumentException.
              (str "Malformed `defcomponent`. Correct syntax: "
                "`(defcomponent [props children] "
