@@ -126,7 +126,7 @@
 ;;====================
 ;; OMCSS-12
 
-(defui ^:once Foo
+(defui ^:once OMCSS-12-Defui
    static oc/Style
    (style [_]
      [[:.root {:background-color "tomato"}]
@@ -137,5 +137,15 @@
      (dom/div {:class :root} "div with class :root"
        (dom/section {:class :section} "section with class :section"))))
 
-(defcard-om-next omcss-12-card
-   Foo)
+(defcard-om-next omcss-12-defui-card
+   OMCSS-12-Defui)
+
+(defcomponent OMCSS-12-Defcomponent [props children]
+  [[:.root {:background-color "tomato"}]
+   [:.section (merge c/some-style
+                {:background-color :green})]]
+  (dom/div {:class :root} "div with class :root"
+    (dom/section {:class :section} "section with class :section")))
+
+(defcard omcss-12-defcomponent-card
+   OMCSS-12-Defcomponent)
