@@ -13,7 +13,7 @@
                '((dom/div {}
                     "Nested `defcomponent` example"))
                component-info)
-            '((dom/div {:omcss$this {:component-name "Foo"
+            '((dom/div {:omcss$info {:component-name "Foo"
                                       :ns-name "ns.core"}}
                  "Nested `defcomponent` example"))))
       (is (= (oc/reshape-render unchanged component-info) unchanged))))
@@ -21,31 +21,31 @@
     (is (= (oc/reshape-render
              '((dom/div {:class :bar} "bar"))
              component-info)
-          '((dom/div {:omcss$this {:component-name "Foo"
+          '((dom/div {:omcss$info {:component-name "Foo"
                                    :ns-name "ns.core"}
                       :class "ns_core_Foo_bar"} "bar"))))
     (is (= (oc/reshape-render
              '((dom/div {:class :bar} "bar"
                    (dom/p {:class :baz} "baz")))
              component-info)
-          '((dom/div {:omcss$this {:component-name "Foo"
+          '((dom/div {:omcss$info {:component-name "Foo"
                                    :ns-name "ns.core"}
                       :class "ns_core_Foo_bar"} "bar"
-              (dom/p {:omcss$this {:component-name "Foo"
+              (dom/p {:omcss$info {:component-name "Foo"
                                    :ns-name "ns.core"}
                       :class "ns_core_Foo_baz"} "baz"))))))
   (testing "`reshape-render` preserves `:className` classnames"
     (is (= (oc/reshape-render
              '((dom/div {:className "bar"} "bar"))
              component-info)
-          '((dom/div {:omcss$this {:component-name "Foo"
+          '((dom/div {:omcss$info {:component-name "Foo"
                                    :ns-name "ns.core"}
                       :className "bar"} "bar")))))
   (testing "`reshape-render` preserves `:class`'s data structure"
     (is (= (oc/reshape-render
              '((dom/div {:class [:root]}))
               component-info)
-          '((dom/div {:omcss$this {:component-name "Foo"
+          '((dom/div {:omcss$info {:component-name "Foo"
                                    :ns-name "ns.core"}
                       :class ["ns_core_Foo_root"]})))))
   (testing "`reshape-render` skips `let` bindings"
@@ -61,12 +61,12 @@
             '((let [x true]
                  (dom/div
                    {:class ["ns_core_Foo_root" "ns_core_Foo_active"]
-                    :omcss$this {:component-name "Foo"
+                    :omcss$info {:component-name "Foo"
                                  :ns-name "ns.core"}}
                    "div with class root"
                    (dom/hr)
                    (dom/section {:class "ns_core_Foo_section"
-                                 :omcss$this {:component-name "Foo"
+                                 :omcss$info {:component-name "Foo"
                                               :ns-name "ns.core"}}
                      "section with class :section"
                      children)))))))))
@@ -118,7 +118,7 @@
                    (render [dia]
                      (dom/div
                        {:class "ns_core_Foo_foo"
-                        :omcss$this {:component-name "Foo"
+                        :omcss$info {:component-name "Foo"
                                      :ns-name "ns.core"}}
                        (dom/div nil "3")))
                    static field a 3
@@ -154,12 +154,12 @@
                   "purple"))
         form2 '((dom/div (merge {:class :root} props) "purple"))]
     (is (= (oc/reshape-render form1 component-info)
-          '((dom/div (merge props {:omcss$this {:component-name "Foo"
+          '((dom/div (merge props {:omcss$info {:component-name "Foo"
                                                 :ns-name "ns.core"}
                                    :class "ns_core_Foo_root"})
               "purple"))))
     (is (= (oc/reshape-render form2 component-info)
-          '((dom/div (merge {:omcss$this {:component-name "Foo"
+          '((dom/div (merge {:omcss$info {:component-name "Foo"
                                           :ns-name "ns.core"}
                              :class "ns_core_Foo_root"}
                        props)

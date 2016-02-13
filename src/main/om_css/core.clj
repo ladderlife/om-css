@@ -1,56 +1,46 @@
 (ns om-css.core
-  (:require [om-css.dom :as dom]
-            [cljs.analyzer.api :as ana-api]
+  (:require [cljs.analyzer.api :as ana-api]
             [cljs.env :as env]
             [clojure.java.io :as io]
             [clojure.string :as string]
-            [clojure.set :as set]
-            [garden.core :as garden])
+            [garden.core :as garden]
+            [om-css.dom :as dom]
+            [om-css.utils :as utils])
   (:import (java.io FileNotFoundException)))
 
 (def css (atom {}))
 
-(defn- format-class-name [this-arg class-name]
-  "generate namespace qualified classname"
-  (let [ns-name (:ns-name this-arg)
-        class-name (name class-name)
-        component-name (-> (:component-name this-arg)
-                         (string/split #"/")
-                         last)]
-    (str (string/replace (munge ns-name) #"\." "_")
-      "_" component-name "_" class-name)))
-
-(defn format-class-names [this-arg cns]
+(defn format-class-names [component-info cns]
   (if-not (or (vector? cns)
             (string? cns)
             (keyword? cns))
     cns
-    (let [cns' (map #(format-class-name this-arg %)
+    (let [cns' (map #(utils/format-class-name component-info %)
                  (if (sequential? cns) cns [cns]))]
       (if (sequential? cns)
         (into [] cns')
         (first cns')))))
 
-(defn reshape-props [props this-arg]
+(defn reshape-props [props component-info]
   (cond
     (map? props)
     (let [props' (->> props
                   (map (fn [[k v :as attr]]
                          (if (= k :class)
-                           [k (format-class-names this-arg v)]
+                           [k (format-class-names component-info v)]
                            attr)))
-                  (into {:omcss$this this-arg}))]
+                  (into {:omcss$info component-info}))]
       props')
 
     (list? props)
     (let [[pre post] (split-with (complement map?) props)
-          props' (concat pre (doall (map #(reshape-props % this-arg) post)))]
+          props' (concat pre (map #(reshape-props % component-info) post))]
       props')
 
     :else props))
 
 (defn reshape-render
-  [form this-arg]
+  [form component-info]
   (loop [dt (seq form) ret []]
     (if dt
       (let [form (first dt)]
@@ -64,7 +54,7 @@
                         ;; TODO: does this need to be hardcoded?
                         ['let 'binding 'when 'if])
                 [[sym props :as pre] post] (split-at 2 form)
-                props' (reshape-props props this-arg)
+                props' (reshape-props props component-info)
                 pre' (if (= (count pre) 2)
                        (list sym props')
                        (list sym))]
@@ -72,11 +62,11 @@
               (into ret
                 [(concat pre'
                    (cond-> post
-                     (or tag? bind?) (reshape-render this-arg)))])))
+                     (or tag? bind?) (reshape-render component-info)))])))
           (recur (next dt) (into ret [form]))))
       ret)))
 
-(defn reshape-defui [forms this-arg]
+(defn reshape-defui [forms component-info]
   (letfn [(split-on-object [forms]
             (split-with (complement '#{Object}) forms))
           (split-on-render [forms]
@@ -89,7 +79,7 @@
         (if (seq post)
           (let [[pre [render & post]] (split-on-render obj-forms)]
             (into (conj ret sym)
-              (concat pre [(reshape-render render this-arg)]
+              (concat pre [(reshape-render render component-info)]
                 post)))
           ret)))))
 
@@ -190,9 +180,9 @@
                           (format-style-classes ns-name component-name))
         css-str (when component-style
                   (garden/css component-style))
-        this-arg {:ns-name ns-name
-                  :component-name (str name)}
-        forms (reshape-defui forms this-arg)
+        component-info {:ns-name ns-name
+                        :component-name (str name)}
+        forms (reshape-defui forms component-info)
         name (cond-> name
                (-> name meta :once) (vary-meta assoc :once true))]
     (when css-str
@@ -226,14 +216,14 @@
                            (format-style-classes ns-name component-name))
         css-str (some-> component-style'
                   garden/css)
-        this-arg {:ns-name ns-name
-                  :component-name component-name}
-        body (reshape-render body this-arg)]
+        component-info {:ns-name ns-name
+                        :component-name component-name}
+        body (reshape-render body component-info)]
     (when css-str
       (swap! css assoc [ns-name name] css-str))
     `(defn ~name [& params#]
        (let [[props# children#] (om-css.dom/parse-params params#)
-             ~props (dissoc  props# :omcss$this)
+             ~props (dissoc  props# :omcss$info)
              ~children children#]
          ~@body))))
 

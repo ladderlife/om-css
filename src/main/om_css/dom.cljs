@@ -1,10 +1,9 @@
 (ns om-css.dom
   (:refer-clojure :exclude [map meta time mask])
   (:require-macros [om-css.dom :refer [gen-tag-fns]])
-  (:require [om.dom :as dom]
-            [clojure.string :as string]))
-
-;;; lifted from https://github.com/plumatic/om-tools/blob/master/src/om_tools/dom.cljx
+  (:require [clojure.string :as string]
+            [om.dom :as dom]
+            [om-css.utils :as utils]))
 
 (defn camel-case
   "Converts kebab-case to camelCase"
@@ -47,21 +46,11 @@
     (map? opt-val) (format-opts opt-val)
     :else opt-val))
 
-(defn- format-class-name [this-arg class-name]
-  "generate namespace qualified classname"
-  (let [ns-name (:ns-name this-arg)
-        class-name (name class-name)
-        component-name (-> (:component-name this-arg)
-                         (string/split #"/")
-                         last)]
-    (str (string/replace (munge ns-name) #"\." "_")
-      "_" component-name "_" class-name)))
-
-(defn format-class-names [this-arg cns]
-  (string/join " "
+(defn format-class-names [component-info cns]
+  (->> (if (sequential? cns) cns [cns])
     (cljs.core/map #(cond->> %
-                      (keyword? %) (format-class-name this-arg))
-      (if (sequential? cns) cns [cns]))))
+          (keyword? %) (utils/format-class-name component-info)))
+    (string/join " ")))
 
 (defn- format-attrs [attrs]
   "leaves :className unchanged, formats :class accordingly"
@@ -70,13 +59,13 @@
       (fn [[k v]]
         [(format-opt-key k)
          (if (= k :class)
-           (format-class-names (:omcss$this attrs) v)
+           (format-class-names (:omcss$info attrs) v)
            (format-opt-val v))]))
     (reduce (fn [m [k v]]
               (if (= k :className)
                 (assoc m k (string/trim  (str (m k "") (str " " v))))
                 (cond-> m
-                  (not= k :omcss$this) (assoc k v)))) {})))
+                  (not= k :omcss$info) (assoc k v)))) {})))
 
 (defn format-opts
   "Returns JavaScript object for React DOM attributes from opts map"
