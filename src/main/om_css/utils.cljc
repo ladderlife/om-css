@@ -17,15 +17,20 @@
 (defn format-cns* [component-info cns]
   ;; unevaluated data structures: a list might be a function call, we
   ;; only support strings, vectors or keywords
-  #?(:clj (if-not (or (vector? cns)
-                    (string? cns)
-                    (keyword? cns))
-            cns
+  #?(:clj (cond
+            (or (vector? cns)
+              (string? cns)
+              (keyword? cns))
             (let [cns' (map #(format-class-name component-info %)
                          (if (sequential? cns) cns [cns]))]
               (if (sequential? cns)
                 (into [] cns')
-                (first cns'))))
+                (first cns')))
+
+            (list? cns)
+            (map #(format-cns* component-info %) cns)
+
+            :else cns)
      ;; only transform keywords at runtime, vectors and strings have
      ;; already been prefixed at macro-expansion time
      :cljs (->> (if (sequential? cns) cns [cns])

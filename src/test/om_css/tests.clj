@@ -178,9 +178,11 @@
                                 :component-name "Foo"}
                    :class "ns_core_Foo_foo"}
     ;; TODO: is this intended behavior?
-    '(merge {:class (subs (str :foo) 1)})'(merge {:omcss$info {:ns-name "ns.core"
-                                                               :component-name "Foo"}
-                                                  :class (subs (str :foo) 1)})))
+    ;; see OMCSS-17
+    '(merge {:class (subs (str :foo) 1)}) '(merge
+                                             {:omcss$info {:component-name "Foo"
+                                                           :ns-name "ns.core"},
+                                              :class (subs (str "ns_core_Foo_foo") 1)})))
 
 (deftest test-format-class-names
   (are [cns res] (= (utils/format-class-names component-info cns) res)
@@ -198,3 +200,15 @@
                  (dom/div {:class [color size]
                            :omcss$info {:component-name "Foo"
                                         :ns-name "ns.core"}})))))))
+
+(deftest test-omcss-17
+  (let [form '((dom/div nil
+                 (inner {:class (flatten [:outer class])}
+                   children)))]
+    (is (= (oc/reshape-render form {:ns-name "om-css.devcards.bugs"
+                                    :component-name "outer"})
+          '((dom/div nil
+              (inner {:omcss$info {:ns-name "om-css.devcards.bugs"
+                                   :component-name "outer"}
+                      :class (flatten ["om_css_devcards_bugs_outer_outer" class])}
+                children)))))))
