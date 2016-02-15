@@ -189,3 +189,12 @@
     [:foo] ["ns_core_Foo_foo"]
     ["foo"] ["ns_core_Foo_foo"]
     ["foo" :bar] ["ns_core_Foo_foo" "ns_core_Foo_bar"]))
+
+(deftest test-omcss-15
+  (let [form '((let [color :red size :xl]
+                 (dom/div {:class [color size]})))]
+    (is (= (oc/reshape-render form component-info)
+          '((let [color :red size :xl]
+                 (dom/div {:class [color size]
+                           :omcss$info {:component-name "Foo"
+                                        :ns-name "ns.core"}})))))))

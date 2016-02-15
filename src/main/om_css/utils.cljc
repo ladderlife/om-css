@@ -3,13 +3,15 @@
 
 (defn format-class-name [component-info class-name]
   "generate namespace qualified classname"
-  (let [ns-name (:ns-name component-info)
-        class-name (name class-name)
-        component-name (-> (:component-name component-info)
-                         (string/split #"/")
-                         last)]
-    (str (string/replace (munge ns-name) #"\." "_")
-      "_" component-name "_" class-name)))
+  (if (symbol? class-name)
+    class-name
+    (let [ns-name (:ns-name component-info)
+          class-name (name class-name)
+          component-name (-> (:component-name component-info)
+                           (string/split #"/")
+                           last)]
+      (str (string/replace (munge ns-name) #"\." "_")
+        "_" component-name "_" class-name))))
 
 
 (defn format-cns* [component-info cns]
