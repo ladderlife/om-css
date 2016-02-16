@@ -215,7 +215,7 @@
       (swap! css assoc [ns-name name] css-str))
     `(defn ~name [& params#]
        (let [[props# children#] (om-css.dom/parse-params params#)
-             ~props (dissoc  props# :omcss$info)
+             ~props (assoc props# :omcss$info ~component-info)
              ~children children#]
          ~@body))))
 

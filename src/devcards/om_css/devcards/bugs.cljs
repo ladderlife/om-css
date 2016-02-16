@@ -149,3 +149,27 @@
 
 (defcard omcss-12-defcomponent-card
    OMCSS-12-Defcomponent)
+
+
+;;====================
+;; OMCSS-18
+
+(defn omcss-18-add-classes [{:keys [class] :as props} & classes]
+  (merge props {:class (flatten [class classes])}))
+
+(defcomponent omcss-18-component [{:keys [class] :as props} children]
+  [[:.test {:color :test}]]
+  (dom/div (omcss-18-add-classes props :test) children))
+
+(defcard omcss-18-card
+  (omcss-18-component {:id "omcss-18"} "test"))
+
+(deftest omcss-18-test
+  (let [c (gdom/getElement "omcss-18")
+          cns (.-className c)
+          cns (.split cns " ")]
+      (is (not (nil? c)))
+      (is (not (nil?
+                 (some
+                   #{"om_css_devcards_bugs_omcss-18-component_test"}
+                   cns))))))
