@@ -1,7 +1,29 @@
-# CSS in Om Next Components [![Clojars Project](https://img.shields.io/clojars/v/com.ladderlife/om-css.svg)](https://clojars.org/com.ladderlife/om-css)
+# om-css
+
+Collocated CSS in Om Next components.
+
+## Contents
+
+- [Installation](#installation)
+- [Guide](#guide)
+  - [Getting started](#getting-started)
+  - [Defining components](#defining-components)
+    - [`defui`](#defui)
+    - [`defcomponent`](#defcomponent)
+  - [Referring to global classes](#referring-to-global-classes)
+  - [Using user-defined variables in collocated styles](#using-user-defined-variables-in-collocated-styles)
+- [License](#license)
 
 
-## How to use it:
+## Installation
+
+Add om-css to your dependencies:
+
+[![Clojars Project](https://clojars.org/com.ladderlife/om-css/latest-version.svg)](https://clojars.org/com.ladderlife/om-css)
+
+## Guide
+
+### Getting started
 
 To get started, `:require` om-css in your project:
 
@@ -11,103 +33,108 @@ To get started, `:require` om-css in your project:
             [om-css.dom :as dom])
 ```
 
-When using om-css's `defui`, using `om-css.dom` is required.
+**Note**: In order to use the collocated style capabilities provided by om-css, using om-css's `defui` and `om-css.dom` is required over Om's.
 
-Define components as you might do in Om Next. Implement om-css.core's `Style` protocol. Styles must use [Garden](https://github.com/noprompt/garden)'s syntax. An example is displayed below:
+om-css provides a way to collocate CSS styles in components. However, this alone is not enough to get actual stylesheet files that you can link to in your web pages. Hence, om-css will generate such css file for you. By default, the generated file will be called `out.css` and will be output at the root of your project. You can, however, instruct om-css to output to a particular file. Simply add a `:css-output-to` option to the ClojureScript compiler options. Below is an example. [Here](./scripts/figwheel.clj#L15)'s a real example.
 
 ```clojure
-(defui Component
+:compiler {:main 'om-css-example.core
+           :asset-path "out"
+           :output-to "resources/public/main.js"
+           :output-dir "resources/public/out"
+           :source-map true
+           :optimizations :none
+           :css-output-to "resources/public/main.css"}
+```
+
+### Defining components
+
+#### `defui`
+
+Components are defined as in Om Next. In addition, om-css provides the `Style` protocol, which you must implement in order to get all the functionality om-css provides. This protocol consists of a single function, `style`, which must return a [Garden](https://github.com/noprompt/garden) styles vector.
+
+In the example shown below, we implement a simple component that declares a style consisting of a single class, `:root`. In the component's `render` function, the props passed to React elements need not be JavaScript objects, and may instead be regular Clojure(Script) maps. The `:class` prop is special to om-css in the sense that it will be prefixed with the namespace and component name so that there are no clashes between components that declare classes with the same names. In our simple example, `:root` will be transformed to `"my_ns_core_SimpleComponent_root"`, and om-css will generate CSS with the same class name.
+
+```clojure
+(ns my-ns.core)
+
+(defui SimpleComponent
   oc/Style
   (style [_]
-    [[:.root {:color "#FFFFF"}]
-     [:.section {:background-color :green})]])
+    [[:.root {:color :yellow}]])
   Object
   (render [this]
-    (dom/div {:id "ns-test"}
-      (dom/div {:class :root} "div with class :root"
-        (dom/section {:class :section} "section with class :section"
-          (dom/p {:className "preserved"} "paragraph with class \"preserved\""))))))
+    (dom/div {:class :root} ;; <= use a vector `[:one :two]` to add multiple classes to an element
+      "Div with class :root"))
 ```
 
-`defcomponent` is syntactic sugar for simple React elements:
+#### `defcomponent`
+
+`defcomponent` is syntactic sugar for simple React elements. These can optionally include a Garden styles vector in their implementation, before the element implementation itself. The following example demonstrates a `defcomponent` implementation.
 
 ```clojure
-;; the styles vector is optional
 (defcomponent element-with-style [props children]
-  [[:.example-class {:background-color "tomato"}]]
+  [[:.example-class {:background-color "tomato"}]] ;; <= optional
   (dom/div {:class :example-class}
-    "Nested `defcomponent` example"
-    (defcomponent-example {:class :some}
-      "some text")))
+    "Nested `defcomponent` example"))
 ```
 
-Styles written in components are written to a CSS file. You can add an option `:css-output-to` to the Clojurescript compiler with the output path for your styles. [Here](./scripts/figwheel.clj#L15)'s an example.
+### Referring to global classes
 
-Check out the file `src/devcards/om_css/devcards/core.cljs` for more examples.
+Collocating CSS within components is not enough for every use case. At times, you may want to use a global CSS class that is defined somewhere else. Referring to classes defined in another location is possible both in om-css's styles vector and in the components implementation.
 
+To reference externally defined CSS classes in the collocated styles, simply use the `$` prefix instead of the normal CSS `.` prefix. To do so in the components `render` implementation, use either one of `:className` or `:class-name`. om-css will only prefix classes that appear in the `:class` prop.
 
-## High level ideas
-- CSS/SASS is not a good programming language and composition, reuse, and
-  abstraction should happen in clojure side.
-- A large CSS codebase is very difficult to reason about and CSS overrides are very difficult to
-  reason about
-- Components are a great way to do composition, reuse, etc
-
-## Concrete idea
-- Write CSS that is one to one with components. Basically CSS rules that only apply to your
-  component and nothing else.
-
-## Implementation Idea
-- Each css rule should be prefixed by a namespace path and the component name.
+The following example shows how this is done in practice. The CSS generated by the styles vector of `example-component` is what you might expect and is presented below the component implementation.
 
 ```clojure
-(defui Foo
-  Object
-  (render [this]
-    (dom/div {:class "ladder_components_Foo"}
-      (dom/div {:class "ladder_components_Foo--section"} "section"))))
+(ns my-ns.core)
+
+(defcomponent example-component [props children]
+  [:$desktop
+   [:.root {:background-color "tomato"}]]
+  (dom/div {:className "desktop"}
+    (dom/div {:class :root}
+      "Some text")))
 ```
 
 ```css
-ladder_components_Foo {
-  some: style;
-}
-
-ladder_components_Foo--section {
-  more: style;
+.desktop .my_ns_core_example-component_root {
+  background-color: tomato;
 }
 ```
 
-## Convenience / syntactic sugar
+### Using user-defined variables in collocated styles
 
-- Writing these full qualified names is prone to mistakes and is tedious.
-- We want to be able to enforce a correspondence between style selectors and component class names.
-- We also want to collocate style with components
-- CSS in CLJS library https://github.com/noprompt/garden
-
-Ultimately we want to get to something like this
+om-css compiles and generates the CSS at macro-expansion time. Because ClojureScript macros are written in Clojure, any functions or variables used inside the collocated style must be declared in a `.clj` or `.cljc` file (commonly a `.cljc` file is preferred so that you can also refer to those variables in your ClojureScript code). An example is presented below.
 
 ```clojure
-(ns ladder.components
-  (:require [ladder.css :as css]))
+(ns my-ns.constants)
+
+(def some-style {:margin "0px"})
+
+(ns my-ns.core
+  (:require [om-css.core :as oc :refer-macros [defui]]
+            [om-css.dom :as dom]
+            [my-ns.constants :as c]))
 
 (defui Foo
-  Style
-  (style []
-    [[:.root {:color (:blue css)}]
-     [:.section (merge css/default-section
-                     {:background-color :green})]])
-  Object
-  (render [this]
-    (dom/div {:class :root}
-      (dom/div {:class :section} "section"))
+   static oc/Style
+   (style [_]
+     [[:.root {:background-color "tomato"}]
+      [:.section (merge c/some-style ;; <= notice this
+                   {:background-color :green})]])
+   Object
+   (render [this]
+     (dom/div {:class :root} "div with class :root"
+       (dom/section {:class :section} "section with class :section"))))
 ```
 
+Check out more examples [here](./src/devcards/om_css/devcards/core.cljs).
 
-## Annoyances
 
-- We'll want to run our css through https://github.com/postcss/autoprefixer
-- This is a js library
-- Solutions: Compiler could run cljs in nodejs
-- Solutions: We could setup / hit autoprefixer from clojure over HTTP
-- Solutions: We could output a css file and have webpack compile it
+## Copyright & License
+
+Copyright © 2016 Ladder Financial, Inc.
+
+Distributed under the Eclipse Public License (see [LICENSE](./LICENSE)).
