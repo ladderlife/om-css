@@ -1,4 +1,4 @@
-# om-css
+# Om-css
 
 Collocated CSS in Om Next components.
 
@@ -17,7 +17,7 @@ Collocated CSS in Om Next components.
 
 ## Installation
 
-Add om-css to your dependencies:
+Add Om-css to your dependencies:
 
 [![Clojars Project](https://clojars.org/com.ladderlife/om-css/latest-version.svg)](https://clojars.org/com.ladderlife/om-css)
 
@@ -25,7 +25,7 @@ Add om-css to your dependencies:
 
 ### Getting started
 
-To get started, `:require` om-css in your project:
+To get started, `:require` Om-css in your project:
 
 ```clojure
 (ns my-ns.core
@@ -33,9 +33,9 @@ To get started, `:require` om-css in your project:
             [om-css.dom :as dom])
 ```
 
-**Note**: In order to use the collocated style capabilities provided by om-css, using om-css's `defui` and `om-css.dom` is required over Om's.
+**Note**: In order to use the collocated style capabilities provided by Om-css, using its own `defui` and `om-css.dom` is required over Om's.
 
-om-css provides a way to collocate CSS styles in components. However, this alone is not enough to get actual stylesheet files that you can link to in your web pages. Hence, om-css will generate such css file for you. By default, the generated file will be called `out.css` and will be output at the root of your project. You can, however, instruct om-css to output to a particular file. Simply add a `:css-output-to` option to the ClojureScript compiler options. Below is an example. [Here](./scripts/figwheel.clj#L15)'s a real example.
+Om-css provides a way to collocate CSS styles in components. However, this alone is not enough to get actual stylesheet files that you can link to in your web pages. Hence, Om-css will generate such css file for you. By default, the generated file will be called `out.css` and will be output at the root of your project. You can, however, instruct Om-css to output to a particular file. Simply add a `:css-output-to` option to the ClojureScript compiler options. Below is an example. [Here](./scripts/figwheel.clj#L15)'s a real example.
 
 ```clojure
 :compiler {:main 'om-css-example.core
@@ -51,9 +51,9 @@ om-css provides a way to collocate CSS styles in components. However, this alone
 
 #### `defui`
 
-Components are defined as in Om Next. In addition, om-css provides the `Style` protocol, which you must implement in order to get all the functionality om-css provides. This protocol consists of a single function, `style`, which must return a [Garden](https://github.com/noprompt/garden) styles vector.
+Components are defined as in Om Next. In addition, Om-css provides the `Style` protocol, which you must implement in order to get all the functionality Om-css provides. This protocol consists of a single function, `style`, which must return a [Garden](https://github.com/noprompt/garden) styles vector.
 
-In the example shown below, we implement a simple component that declares a style consisting of a single class, `:root`. In the component's `render` function, the props passed to React elements need not be JavaScript objects, and may instead be regular Clojure(Script) maps. The `:class` prop is special to om-css in the sense that it will be prefixed with the namespace and component name so that there are no clashes between components that declare classes with the same names. In our simple example, `:root` will be transformed to `"my_ns_core_SimpleComponent_root"`, and om-css will generate CSS with the same class name.
+In the example shown below, we implement a simple component that declares a style consisting of a single class, `:root`. In the component's `render` function, the props passed to React elements need not be JavaScript objects, and may instead be regular Clojure(Script) maps. The `:class` prop is special to Om-css in the sense that it will be prefixed with the namespace and component name so that there are no clashes between components that declare classes with the same names. In our simple example, `:root` will be transformed to `"my_ns_core_SimpleComponent_root"`, and Om-css will generate CSS with the same class name.
 
 ```clojure
 (ns my-ns.core)
@@ -81,9 +81,9 @@ In the example shown below, we implement a simple component that declares a styl
 
 ### Referring to global classes
 
-Collocating CSS within components is not enough for every use case. At times, you may want to use a global CSS class that is defined somewhere else. Referring to classes defined in another location is possible both in om-css's styles vector and in the components implementation.
+Collocating CSS within components is not enough for every use case. At times, you may want to use a global CSS class that is defined somewhere else. Referring to classes defined in another location is possible both in Om-css's styles vector and in the components implementation.
 
-To reference externally defined CSS classes in the collocated styles, simply use the `$` prefix instead of the normal CSS `.` prefix. To do so in the components `render` implementation, use either one of `:className` or `:class-name`. om-css will only prefix classes that appear in the `:class` prop.
+To reference externally defined CSS classes in the collocated styles, simply use the `$` prefix instead of the normal CSS `.` prefix. To do so in the components `render` implementation, use either one of `:className` or `:class-name`. Om-css will only prefix classes that appear in the `:class` prop.
 
 The following example shows how this is done in practice. The CSS generated by the styles vector of `example-component` is what you might expect and is presented below the component implementation.
 
@@ -106,7 +106,7 @@ The following example shows how this is done in practice. The CSS generated by t
 
 ### User-defined variables in collocated styles
 
-om-css compiles and generates the CSS at macro-expansion time. Because ClojureScript macros are written in Clojure, any functions or variables used inside the collocated style must be declared in a `.clj` or `.cljc` file (commonly a `.cljc` file is preferred so that you can also refer to those variables in your ClojureScript code). An example is presented below.
+Om-css compiles and generates the CSS at macro-expansion time. Because ClojureScript macros are written in Clojure, any functions or variables used inside the collocated style must be declared in a `.clj` or `.cljc` file (commonly a `.cljc` file is preferred so that you can also refer to those variables in your ClojureScript code). An example is presented below.
 
 ```clojure
 (ns my-ns.constants)
