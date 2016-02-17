@@ -57,7 +57,14 @@
            (format-opt-val v))]))
     (reduce (fn [m [k v]]
               (if (= k :className)
-                (assoc m k (string/trim  (str (m k "") (str " " v))))
+                ;; :omcss$info might end up in classes because we're naively
+                ;; adding it to a map that appears in props. A stronger
+                ;; solution might be to check if such map contains the :class keyword
+                ;; but this might introduce other edge cases. Circle back.
+                (let [v' (remove #{:omcss$info "omcss$info"} v)]
+                  (assoc m k
+                    (string/trim
+                      (str (m k "") (str " " (string/replace v #":omcss\$info" ""))))))
                 (cond-> m
                   (not= k :omcss$info) (assoc k v)))) {})))
 
