@@ -13,22 +13,22 @@
       (is (= (oc/reshape-render
                '((dom/div {}
                     "Nested `defcomponent` example"))
-               component-info)
+               component-info nil)
             '((dom/div {:omcss$info {:component-name "Foo"
                                       :ns-name "ns.core"}}
                  "Nested `defcomponent` example"))))
-      (is (= (oc/reshape-render unchanged component-info) unchanged))))
+      (is (= (oc/reshape-render unchanged component-info nil) unchanged))))
   (testing "`reshape-render` adds namespace qualified classes (:class)"
     (is (= (oc/reshape-render
              '((dom/div {:class :bar} "bar"))
-             component-info)
+             component-info #{:bar})
           '((dom/div {:omcss$info {:component-name "Foo"
                                    :ns-name "ns.core"}
                       :class "ns_core_Foo_bar"} "bar"))))
     (is (= (oc/reshape-render
              '((dom/div {:class :bar} "bar"
                    (dom/p {:class :baz} "baz")))
-             component-info)
+             component-info #{:bar :baz})
           '((dom/div {:omcss$info {:component-name "Foo"
                                    :ns-name "ns.core"}
                       :class "ns_core_Foo_bar"} "bar"
@@ -38,14 +38,14 @@
   (testing "`reshape-render` preserves `:className` classnames"
     (is (= (oc/reshape-render
              '((dom/div {:className "bar"} "bar"))
-             component-info)
+             component-info nil)
           '((dom/div {:omcss$info {:component-name "Foo"
                                    :ns-name "ns.core"}
                       :className "bar"} "bar")))))
   (testing "`reshape-render` preserves `:class`'s data structure"
     (is (= (oc/reshape-render
              '((dom/div {:class [:root]}))
-              component-info)
+              component-info #{:root})
           '((dom/div {:omcss$info {:component-name "Foo"
                                    :ns-name "ns.core"}
                       :class ["ns_core_Foo_root"]})))))
@@ -58,7 +58,7 @@
                       (dom/section {:class :section}
                         "section with class :section"
                         children))))]
-      (is (= (oc/reshape-render form component-info)
+      (is (= (oc/reshape-render form component-info #{:root :active :section})
             '((let [x true]
                  (dom/div
                    {:class ["ns_core_Foo_root" "ns_core_Foo_active"]
@@ -125,11 +125,11 @@
                    static field a 3
                    static om/IQuery
                    (query [this] [:a])]]
-    (is (= (oc/reshape-defui form component-info)
+    (is (= (oc/reshape-defui form component-info #{:foo})
           expected))
     (is (= (oc/reshape-defui
              '(Object (render [this] (dom/div nil "foo")))
-             component-info)
+             component-info nil)
           '[Object (render [this] (dom/div nil "foo"))]))))
 
 (deftest test-infer-requires
@@ -154,12 +154,12 @@
   (let [form1 '((dom/div (merge props {:class :root})
                   "purple"))
         form2 '((dom/div (merge {:class :root} props) "purple"))]
-    (is (= (oc/reshape-render form1 component-info)
+    (is (= (oc/reshape-render form1 component-info #{:root})
           '((dom/div (merge props {:omcss$info {:component-name "Foo"
                                                 :ns-name "ns.core"}
                                    :class "ns_core_Foo_root"})
               "purple"))))
-    (is (= (oc/reshape-render form2 component-info)
+    (is (= (oc/reshape-render form2 component-info #{:root})
           '((dom/div (merge {:omcss$info {:component-name "Foo"
                                           :ns-name "ns.core"}
                              :class "ns_core_Foo_root"}
@@ -167,22 +167,22 @@
               "purple"))))))
 
 (deftest test-reshape-props
-  (are [props res] (= (oc/reshape-props props component-info) res)
-    '(merge {:class "foo"}) '(merge {:omcss$info {:ns-name "ns.core"
-                                                  :component-name "Foo"}
-                                     :class "ns_core_Foo_foo"})
-    {:class "foo"} {:omcss$info {:ns-name "ns.core"
-                                 :component-name "Foo"}
-                    :class "ns_core_Foo_foo"}
-    {:class :foo} {:omcss$info {:ns-name "ns.core"
-                                :component-name "Foo"}
-                   :class "ns_core_Foo_foo"}
+  (are [props classes res] (= (oc/reshape-props props component-info classes) res)
+    '(merge {:class "foo"}) #{"foo"} '(merge {:omcss$info {:ns-name "ns.core"
+                                                      :component-name "Foo"}
+                                         :class "ns_core_Foo_foo"})
+    {:class "foo"} #{"foo"} {:omcss$info {:ns-name "ns.core"
+                                     :component-name "Foo"}
+                        :class "ns_core_Foo_foo"}
+    {:class :foo} #{:foo} {:omcss$info {:ns-name "ns.core"
+                                    :component-name "Foo"}
+                       :class "ns_core_Foo_foo"}
     ;; TODO: is this intended behavior?
     ;; see OMCSS-17
-    '(merge {:class (subs (str :foo) 1)}) '(merge
-                                             {:omcss$info {:component-name "Foo"
-                                                           :ns-name "ns.core"},
-                                              :class (subs (str "ns_core_Foo_foo") 1)})))
+    '(merge {:class (subs (str :foo) 1)}) #{:foo} '(merge
+                                                 {:omcss$info {:component-name "Foo"
+                                                               :ns-name "ns.core"},
+                                                  :class (subs (str "ns_core_Foo_foo") 1)})))
 
 (deftest test-format-class-names
   (are [cns res] (= (utils/format-class-names component-info cns) res)
@@ -195,7 +195,7 @@
 (deftest test-omcss-15
   (let [form '((let [color :red size :xl]
                  (dom/div {:class [color size]})))]
-    (is (= (oc/reshape-render form component-info)
+    (is (= (oc/reshape-render form component-info nil)
           '((let [color :red size :xl]
                  (dom/div {:class [color size]
                            :omcss$info {:component-name "Foo"
@@ -205,10 +205,36 @@
   (let [form '((dom/div nil
                  (inner {:class (flatten [:outer class])}
                    children)))]
-    (is (= (oc/reshape-render form {:ns-name "om-css.devcards.bugs"
-                                    :component-name "outer"})
+    (is (= (oc/reshape-render form
+             {:ns-name "om-css.devcards.bugs"
+              :component-name "outer"}
+             #{:outer})
           '((dom/div nil
               (inner {:omcss$info {:ns-name "om-css.devcards.bugs"
                                    :component-name "outer"}
                       :class (flatten ["om_css_devcards_bugs_outer_outer" class])}
                 children)))))))
+
+(deftest test-omcss-20
+  (let [form '((let [dir "even"]
+                 (dom/div
+                   {:class (if (= dir "even") [:even] [])})))]
+    (is (= (oc/reshape-render form component-info #{:even})
+          '((let [dir "even"]
+              (dom/div {:omcss$info {:component-name "Foo"
+                                     :ns-name "ns.core"}
+                        :class (if (= dir "even")
+                                 ["ns_core_Foo_even"]
+                                 [])})))))))
+
+(deftest test-format-style-classes
+  (let [{:keys [ns-name component-name]} component-info]
+    (are [style res] (= (oc/format-style-classes style ns-name component-name)
+                       res)
+      [:.root {:color :purple}] {:style [".ns_core_Foo_root"
+                                         {:color :purple}]
+                                 :classes #{:root}}
+      [[:.root {:color :purple}]
+       [:.section {:text-align :center}]] {:style [[".ns_core_Foo_root" {:color :purple}]
+                                                   [".ns_core_Foo_section" {:text-align :center}]]
+                                         :classes #{:root :section}})))

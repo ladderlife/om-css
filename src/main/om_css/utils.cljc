@@ -14,21 +14,25 @@
         "_" component-name "_" class-name))))
 
 
-(defn format-cns* [component-info cns]
+(defn format-cns* [component-info cns classes-seen]
   ;; unevaluated data structures: a list might be a function call, we
   ;; only support strings, vectors or keywords
   #?(:clj (cond
             (or (vector? cns)
               (string? cns)
               (keyword? cns))
-            (let [cns' (map #(format-class-name component-info %)
+            (let [cns' (map #(cond->> %
+                               (and classes-seen
+                                 (if (fn? classes-seen)
+                                   (classes-seen)
+                                   (classes-seen %))) (format-class-name component-info))
                          (if (sequential? cns) cns [cns]))]
               (if (sequential? cns)
                 (into [] cns')
                 (first cns')))
 
             (list? cns)
-            (map #(format-cns* component-info %) cns)
+            (map #(format-cns* component-info % classes-seen) cns)
 
             :else cns)
      ;; only transform keywords at runtime, vectors and strings have
@@ -38,5 +42,8 @@
                      (keyword? %) (format-class-name component-info)))
              (string/join " "))))
 
-(defn format-class-names [component-info cns]
-  (format-cns* component-info cns))
+(defn format-class-names
+  ([component-info cns]
+   (format-cns* component-info cns (constantly true)))
+  ([component-info cns classes-seen]
+   (format-cns* component-info cns classes-seen)))

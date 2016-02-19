@@ -173,3 +173,15 @@
                  (some
                    #{"om_css_devcards_bugs_omcss-18-component_test"}
                    cns))))))
+
+;;====================
+;; OMCSS-20
+
+(defcomponent omcss-20-component [props children]
+  (let [dir "even"]
+    (dom/div
+      {:class (if (= dir "even") [:even] [])}
+      "asd")))
+
+(defcard omcss-20-card
+  (omcss-20-component))

@@ -10,26 +10,28 @@
 
 (def css (atom {}))
 
-(defn reshape-props [props component-info]
+(defn reshape-props [props component-info classes-seen]
   (cond
     (map? props)
     (let [props' (->> props
-                  (map (fn [[k v :as attr]]
-                         (if (= k :class)
-                           [k (utils/format-class-names component-info v)]
-                           attr)))
-                  (into {:omcss$info component-info}))]
+                  (reduce
+                    (fn [m [k v]]
+                      (if (= k :class)
+                        (assoc m k (utils/format-class-names
+                                     component-info v classes-seen))
+                        (assoc m k v)))
+                    {:omcss$info component-info}))]
       props')
 
     (list? props)
     (let [[pre post] (split-with (complement map?) props)
-          props' (concat pre (map #(reshape-props % component-info) post))]
+          props' (concat pre (map #(reshape-props % component-info classes-seen) post))]
       props')
 
     :else props))
 
 (defn reshape-render
-  [form component-info]
+  [form component-info classes-seen]
   (loop [dt (seq form) ret []]
     (if dt
       (let [form (first dt)]
@@ -43,7 +45,7 @@
                         ;; TODO: does this need to be hardcoded?
                         ['let 'binding 'when 'if])
                 [[sym props :as pre] post] (split-at 2 form)
-                props' (reshape-props props component-info)
+                props' (reshape-props props component-info classes-seen)
                 pre' (if (= (count pre) 2)
                        (list sym props')
                        (list sym))]
@@ -51,11 +53,11 @@
               (into ret
                 [(concat pre'
                    (cond-> post
-                     (or tag? bind?) (reshape-render component-info)))])))
+                     (or tag? bind?) (reshape-render component-info classes-seen)))])))
           (recur (next dt) (into ret [form]))))
       ret)))
 
-(defn reshape-defui [forms component-info]
+(defn reshape-defui [forms component-info classes-seen]
   (letfn [(split-on-object [forms]
             (split-with (complement '#{Object}) forms))
           (split-on-render [forms]
@@ -68,7 +70,7 @@
         (if (seq post)
           (let [[pre [render & post]] (split-on-render obj-forms)]
             (into (conj ret sym)
-              (concat pre [(reshape-render render component-info)]
+              (concat pre [(reshape-render render component-info classes-seen)]
                 post)))
           ret)))))
 
@@ -101,21 +103,29 @@
     (str "." (munge-ns-name ns-name)
       "_" component-name "_" (subs class-name 1))))
 
-(defn format-style-classes [styles ns-name component-name]
-  (->> styles
-    (clojure.core/map
-      #(cond
-         (sequential? %)
-         (format-style-classes % ns-name component-name)
+(defn format-style-classes
+  [styles ns-name component-name]
+  (let [classes-seen (atom #{})]
+    (letfn [(format-style-classes* [styles ns-name component-name]
+              (->> styles
+                (clojure.core/map
+                  #(cond
+                     (sequential? %)
+                     (format-style-classes* % ns-name component-name)
 
-         (and (keyword? %) (.startsWith (name %) "."))
-         (format-garden-class-name ns-name component-name %)
+                     (and (keyword? %) (.startsWith (name %) "."))
+                     (let [cn %]
+                       (swap! classes-seen conj (keyword (subs (name cn) 1)))
+                       (format-garden-class-name ns-name component-name cn))
 
-         (and (keyword? %) (.startsWith (name %) "$"))
-         (str "." (subs (name %) 1))
+                     (and (keyword? %) (.startsWith (name %) "$"))
+                     (str "." (subs (name %) 1))
 
-         :else %))
-    (into [])))
+                     :else %))
+                (into [])))]
+      (let [styles (format-style-classes* styles ns-name component-name)]
+        {:style styles
+         :classes @classes-seen}))))
 
 (defn infer-requires [{env-ns :ns :as env} forms]
   (letfn [(split-on-symbol [form]
@@ -165,13 +175,15 @@
         component-name (str name)
         component-style (-> forms
                           get-component-style
-                          (eval-component-style env)
-                          (format-style-classes ns-name component-name))
-        css-str (when component-style
-                  (garden/css component-style))
+                          (eval-component-style env))
+        {:keys [style classes]} (when component-style
+                                  (format-style-classes component-style
+                                    ns-name component-name))
+        css-str (when style
+                  (garden/css style))
         component-info {:ns-name ns-name
                         :component-name (str name)}
-        forms (reshape-defui forms component-info)
+        forms (reshape-defui forms component-info classes)
         name (cond-> name
                (-> name meta :once) (vary-meta assoc :once true))]
     (when css-str
@@ -204,13 +216,15 @@
   (let [ns-name (-> env :ns :name str)
         component-name (str name)
         component-style' (some-> component-style
-                           (eval-component-style env)
-                           (format-style-classes ns-name component-name))
-        css-str (some-> component-style'
+                           (eval-component-style env))
+        {:keys [style classes]} (when component-style'
+                                  (format-style-classes component-style'
+                                    ns-name component-name))
+        css-str (some-> style
                   garden/css)
         component-info {:ns-name ns-name
                         :component-name component-name}
-        body (reshape-render body component-info)]
+        body (reshape-render body component-info classes)]
     (when css-str
       (swap! css assoc [ns-name name] css-str))
     `(defn ~name [& params#]
