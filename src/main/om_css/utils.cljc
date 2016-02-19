@@ -31,6 +31,11 @@
                 (into [] cns')
                 (first cns')))
 
+            (map? cns)
+            (into {} (map (fn [[k v]]
+                   [(format-cns* component-info k classes-seen)
+                    (format-cns* component-info v classes-seen)])) cns)
+
             (list? cns)
             (map #(format-cns* component-info % classes-seen) cns)
 

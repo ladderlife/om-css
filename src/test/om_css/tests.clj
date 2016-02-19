@@ -190,7 +190,8 @@
     "foo" "ns_core_Foo_foo"
     [:foo] ["ns_core_Foo_foo"]
     ["foo"] ["ns_core_Foo_foo"]
-    ["foo" :bar] ["ns_core_Foo_foo" "ns_core_Foo_bar"]))
+    ["foo" :bar] ["ns_core_Foo_foo" "ns_core_Foo_bar"]
+    '(keys {:root true}) '(keys {"ns_core_Foo_root" true})))
 
 (deftest test-omcss-15
   (let [form '((let [color :red size :xl]
