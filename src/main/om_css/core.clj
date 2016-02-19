@@ -116,7 +116,7 @@
                      (and (or (keyword? %) (string? %))
                        (.contains (name %) "."))
                      (let [cn (name %)
-                           cns (remove empty? (str/split cn #"\."))
+                           cns (remove empty? (string/split cn #"\."))
                            elem (when-not (.startsWith cn ".") (first cns))]
                        (swap! classes-seen into
                          (map keyword (cond-> cns
