@@ -229,12 +229,21 @@
 
 (deftest test-format-style-classes
   (let [{:keys [ns-name component-name]} component-info]
-    (are [style res] (= (oc/format-style-classes style ns-name component-name)
-                       res)
-      [:.root {:color :purple}] {:style [".ns_core_Foo_root"
-                                         {:color :purple}]
-                                 :classes #{:root}}
-      [[:.root {:color :purple}]
-       [:.section {:text-align :center}]] {:style [[".ns_core_Foo_root" {:color :purple}]
-                                                   [".ns_core_Foo_section" {:text-align :center}]]
-                                         :classes #{:root :section}})))
+    (testing ""
+      (are [style res] (= (oc/format-style-classes style ns-name component-name)
+                         res)
+        [:.root {:color :purple}] {:style [".ns_core_Foo_root"
+                                           {:color :purple}]
+                                   :classes #{:root}}
+        [[:.root {:color :purple}]
+         [:.section {:text-align :center}]] {:style [[".ns_core_Foo_root" {:color :purple}]
+                                                     [".ns_core_Foo_section" {:text-align :center}]]
+                                             :classes #{:root :section}}))
+    (testing "OMCSS-19"
+      (is (= (#'oc/format-garden-class-name ns-name component-name ["root"])
+            ".ns_core_Foo_root"))
+      (is (= (oc/format-style-classes
+               [:h1.root {:color "#FFFFF"}]
+               ns-name component-name)
+            {:style ["h1.ns_core_Foo_root" {:color "#FFFFF"}]
+             :classes #{:root}})))))

@@ -96,12 +96,12 @@
 (defn- munge-ns-name [ns-name]
   (string/replace (munge ns-name) #"\." "_"))
 
-(defn- format-garden-class-name [ns-name component-name class-name]
+(defn- format-garden-class-name [ns-name component-name cns]
   "generate namespace qualified classname"
-  (let [ns-name ns-name
-        class-name (name class-name)]
-    (str "." (munge-ns-name ns-name)
-      "_" component-name "_" (subs class-name 1))))
+  (reduce
+    #(str %1 "." (munge-ns-name ns-name)
+       "_" component-name "_" %2)
+    "" cns))
 
 (defn format-style-classes
   [styles ns-name component-name]
@@ -113,10 +113,19 @@
                      (sequential? %)
                      (format-style-classes* % ns-name component-name)
 
-                     (and (keyword? %) (.startsWith (name %) "."))
-                     (let [cn %]
-                       (swap! classes-seen conj (keyword (subs (name cn) 1)))
-                       (format-garden-class-name ns-name component-name cn))
+                     (and (or (keyword? %) (string? %))
+                       (.contains (name %) "."))
+                     (let [cn (name %)
+                           cns (remove empty? (str/split cn #"\."))
+                           elem (when-not (.startsWith cn ".") (first cns))]
+                       (swap! classes-seen into
+                         (map keyword (cond-> cns
+                                        (not (nil? elem)) rest)))
+                       (str elem
+                         (format-garden-class-name ns-name component-name
+                           (if elem
+                             (rest cns)
+                             cns))))
 
                      (and (keyword? %) (.startsWith (name %) "$"))
                      (str "." (subs (name %) 1))
