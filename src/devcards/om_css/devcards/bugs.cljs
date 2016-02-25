@@ -185,3 +185,29 @@
 
 (defcard omcss-20-card
   (omcss-20-component))
+
+;;====================
+;; OMCSS-23
+
+(defcomponent inner [props children]
+  (dom/div props children))
+
+(defcomponent outer [props children]
+  (dom/div props children))
+
+(defcomponent wrapper [props children]
+  [[:.inner {}]]
+  (let []
+    (outer {:class :outer
+            :id "omcss-23"}
+     (inner {:class :inner} "inner"))))
+
+(defcard omcss-23-card
+  (wrapper))
+
+(deftest omcss-23-test
+  (let [c (gdom/getElement "omcss-23")
+          cns (.-className c)
+          cns (.split cns " ")]
+      (is (not (nil? c)))
+      (is (not (nil? (some #{":outer"} cns))))))

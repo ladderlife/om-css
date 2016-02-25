@@ -23,9 +23,9 @@
               (keyword? cns))
             (let [cns' (map #(cond->> %
                                (and classes-seen
-                                 (if (fn? classes-seen)
-                                   (classes-seen)
-                                   (classes-seen %))) (format-class-name component-info))
+                                 (if (boolean? classes-seen)
+                                   classes-seen
+                                   (get classes-seen %))) (format-class-name component-info))
                          (if (sequential? cns) cns [cns]))]
               (if (sequential? cns)
                 (into [] cns')
@@ -44,11 +44,12 @@
      ;; already been prefixed at macro-expansion time
      :cljs (->> (if (sequential? cns) cns [cns])
              (map #(cond->> %
-                     (keyword? %) (format-class-name component-info)))
+                     (and (keyword? %)
+                       (get classes-seen %)) (format-class-name component-info)))
              (string/join " "))))
 
 (defn format-class-names
   ([component-info cns]
-   (format-cns* component-info cns (constantly true)))
+   (format-cns* component-info cns true))
   ([component-info cns classes-seen]
    (format-cns* component-info cns classes-seen)))

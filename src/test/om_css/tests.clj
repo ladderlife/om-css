@@ -248,3 +248,18 @@
                ns-name component-name)
             {:style ["h1.ns_core_Foo_root" {:color "#FFFFF"}]
              :classes #{:root}})))))
+
+(deftest test-omcss-23
+  (let [form '((outer
+                 {:class :outer}
+                 (inner {:class :inner} "inner")))]
+    (is (= (oc/reshape-render form
+             {:ns-name "om-css.devcards.bugs"
+              :component-name "wrapper"}
+             #{:outer :inner})
+          '((outer {:omcss$info {:ns-name "om-css.devcards.bugs"
+                                 :component-name "wrapper"}
+                    :class "om_css_devcards_bugs_wrapper_outer"}
+              (inner {:omcss$info {:ns-name "om-css.devcards.bugs"
+                                   :component-name "wrapper"}
+                      :class "om_css_devcards_bugs_wrapper_inner"} "inner")))))))

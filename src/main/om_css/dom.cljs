@@ -53,9 +53,9 @@
       (fn [[k v]]
         [(format-opt-key k)
          (if (= k :class)
-           ;; TODO: still formats every class. could also filter based
-           ;; on the classes that we've seen in the styles vector.
-           (utils/format-class-names (:omcss$info attrs) v)
+           (let [component-info (:omcss$info attrs)
+                 classes-seen (:classes component-info)]
+             (utils/format-class-names component-info v classes-seen))
            (format-opt-val v))]))
     (reduce (fn [m [k v]]
               (if (= k :className)

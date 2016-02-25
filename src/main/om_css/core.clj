@@ -52,8 +52,7 @@
             (recur (next dt)
               (into ret
                 [(concat pre'
-                   (cond-> post
-                     (or tag? bind?) (reshape-render component-info classes-seen)))])))
+                   (reshape-render post component-info classes-seen))])))
           (recur (next dt) (into ret [form]))))
       ret)))
 
@@ -232,7 +231,8 @@
         css-str (some-> style
                   garden/css)
         component-info {:ns-name ns-name
-                        :component-name component-name}
+                        :component-name component-name
+                        :classes classes}
         body (reshape-render body component-info classes)]
     (when css-str
       (swap! css assoc [ns-name name] css-str))
