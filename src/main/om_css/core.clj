@@ -234,7 +234,9 @@
         component-info {:ns-name ns-name
                         :component-name component-name
                         :classes classes}
-        body (reshape-render body component-info classes)]
+        body (if (vector? (first body))
+               (into [] (map #(reshape-render % component-info classes)) body)
+               (reshape-render body component-info classes))]
     (when css-str
       (swap! css assoc [ns-name name] css-str))
     `(defn ~name [& params#]

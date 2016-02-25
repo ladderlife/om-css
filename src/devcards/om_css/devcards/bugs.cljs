@@ -211,3 +211,14 @@
           cns (.split cns " ")]
       (is (not (nil? c)))
       (is (not (nil? (some #{":outer"} cns))))))
+
+;;====================
+;; OMCSS-22
+
+(defcomponent omcss-22 [props children]
+  []
+  [(dom/div nil "something") (dom/div "other")])
+
+(defcard omcss-22-card
+  (dom/div nil
+    (omcss-22)))
