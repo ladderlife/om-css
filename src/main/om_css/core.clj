@@ -190,7 +190,8 @@
         css-str (when style
                   (garden/css style))
         component-info {:ns-name ns-name
-                        :component-name (str name)}
+                        :component-name (str name)
+                        :classes classes}
         forms (reshape-defui forms component-info classes)
         name (cond-> name
                (-> name meta :once) (vary-meta assoc :once true))]
