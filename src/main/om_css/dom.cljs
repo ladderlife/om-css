@@ -66,7 +66,10 @@
                 (let [v' (remove #{:omcss$info "omcss$info"} v)]
                   (assoc m k
                     (string/trim
-                      (str (m k "") (str " " (string/replace v #":omcss\$info" ""))))))
+                      (str (m k "")
+                        (str " "
+                          (some-> v
+                            (string/replace #":omcss\$info" "")))))))
                 (cond-> m
                   (not= k :omcss$info) (assoc k v)))) {})))
 

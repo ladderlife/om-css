@@ -222,3 +222,12 @@
 (defcard omcss-22-card
   (dom/div nil
     (omcss-22)))
+
+;;====================
+;; OMCSS-25
+
+(defcomponent omcss-25-component [props children]
+  (dom/div {:class-name nil} "omcss-25"))
+
+(defcard omcss-25-card
+  (omcss-25-component))
