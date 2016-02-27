@@ -263,3 +263,8 @@
               (inner {:omcss$info {:ns-name "om-css.devcards.bugs"
                                    :component-name "wrapper"}
                       :class "om_css_devcards_bugs_wrapper_inner"} "inner")))))))
+
+(deftest test-omcss-24
+  (let [form '(((if true dom/div dom/span) children))]
+    (is (= (oc/reshape-render form component-info #{})
+          form))))

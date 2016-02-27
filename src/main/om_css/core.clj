@@ -36,15 +36,7 @@
     (if dt
       (let [form (first dt)]
         (if (and (sequential? form) (not (empty? form)))
-          (let [first-form (name (first form))
-                tag? (some #{(symbol first-form)} dom/all-tags)
-                bind? (some #{(-> (str first-form)
-                                (string/split #"-")
-                                first
-                                symbol)}
-                        ;; TODO: does this need to be hardcoded?
-                        ['let 'binding 'when 'if])
-                [[sym props :as pre] post] (split-at 2 form)
+          (let [[[sym props :as pre] post] (split-at 2 form)
                 props' (reshape-props props component-info classes-seen)
                 pre' (if (= (count pre) 2)
                        (list sym props')
