@@ -7,7 +7,7 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.7.228"]
                  [org.omcljs/om "1.0.0-alpha30"]
-                 [garden "1.3.0"]
+                 [garden "1.3.2"]
 
                  [figwheel-sidecar "0.5.0-6" :scope "test"]
                  [devcards "0.2.1-6" :scope "test"]
