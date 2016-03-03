@@ -70,6 +70,7 @@
   NotStaticStyleComponent)
 
 (defcomponent defcomponent-example [props children]
+  [[:.defcomponent-class {:color "green"}]]
   (dom/div {:class :defcomponent-class}
     "`defcomponent` example with class `:defcomponent-class`"))
 
