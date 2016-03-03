@@ -55,7 +55,7 @@
          (if (= k :class)
            (let [component-info (:omcss$info attrs)
                  classes-seen (:classes component-info)]
-             (utils/format-class-names component-info v classes-seen))
+             (utils/format-class-names v component-info classes-seen))
            (format-opt-val v))]))
     (reduce (fn [m [k v]]
               (if (= k :className)

@@ -185,7 +185,7 @@
                                                   :class (subs (str "ns_core_Foo_foo") 1)})))
 
 (deftest test-format-class-names
-  (are [cns res] (= (utils/format-class-names component-info cns) res)
+  (are [cns res] (= (utils/format-class-names cns component-info) res)
     :foo "ns_core_Foo_foo"
     "foo" "ns_core_Foo_foo"
     [:foo] ["ns_core_Foo_foo"]
@@ -268,3 +268,8 @@
   (let [form '(((if true dom/div dom/span) children))]
     (is (= (oc/reshape-render form component-info #{})
           form))))
+
+(deftest test-omcss-27
+  (let [form '((dom/div (my-class :root)))]
+    (is (= (oc/reshape-render form component-info #{:root})
+          '((dom/div (my-class "ns_core_Foo_root")))))))

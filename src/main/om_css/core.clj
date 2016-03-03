@@ -18,14 +18,18 @@
                     (fn [m [k v]]
                       (if (= k :class)
                         (assoc m k (utils/format-class-names
-                                     component-info v classes-seen))
+                                     v component-info classes-seen))
                         (assoc m k v)))
                     {:omcss$info component-info}))]
       props')
 
     (list? props)
     (let [[pre post] (split-with (complement map?) props)
-          props' (concat pre (map #(reshape-props % component-info classes-seen) post))]
+          props' (concat (map #(cond-> %
+                                 (keyword? %)
+                                 (utils/format-class-names component-info #{:root}))
+                           pre)
+                   (map #(reshape-props % component-info classes-seen) post))]
       props')
 
     :else props))
