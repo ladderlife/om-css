@@ -153,9 +153,14 @@
                   ;; clojure function / var
                   (recur (next dt) ret)
                   (do
-                    (let [sym-ns (some-> env-ns :defs form :name namespace symbol)]
-                      (if (= sym-ns (-> env-ns :name))
-                        (recur (next dt) (conj ret `(~'use '~sym-ns)))
+                    (let [sym-ns (some-> env-ns :defs form :name namespace symbol)
+                          sym-ns (when sym-ns
+                                   `(~'use '~sym-ns))
+                          use-ns (when-let [kv (find (:uses env-ns) form)]
+                                   `(~'use '[~(second kv) :only [~(first kv)]]))]
+                      (if (or (= sym-ns (-> env-ns :name)) use-ns)
+                        (recur (next dt)
+                          (conj ret (when sym-ns sym-ns) (when use-ns use-ns)))
                         (recur (next dt) ret)))))))
             :else (recur (next dt) ret)))
         ret))))

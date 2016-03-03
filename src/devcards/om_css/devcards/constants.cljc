@@ -2,3 +2,6 @@
 
 (def some-style
   {:color :yellow})
+
+(def other-style
+  {:text-decoration :underline})

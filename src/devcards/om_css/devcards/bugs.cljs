@@ -7,7 +7,7 @@
             [om.dom :as om-dom]
             [om-css.dom :as dom]
             [om-css.core :as oc :refer-macros [defui defcomponent]]
-            [om-css.devcards.constants :as c]))
+            [om-css.devcards.constants :as c :refer [other-style]]))
 
 ;;====================
 ;; OMCSS-2
@@ -142,7 +142,7 @@
 
 (defcomponent OMCSS-12-Defcomponent [props children]
   [[:.root {:background-color "tomato"}]
-   [:.section (merge c/some-style
+   [:.section (merge c/some-style other-style
                 {:background-color :green})]]
   (dom/div {:class :root} "div with class :root"
     (dom/section {:class :section} "section with class :section")))
