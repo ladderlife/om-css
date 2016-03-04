@@ -47,8 +47,9 @@
                        (list sym))]
             (recur (next dt)
               (into ret
-                [(concat pre'
-                   (reshape-render post component-info classes-seen))])))
+                [(cond->> (concat pre'
+                            (reshape-render post component-info classes-seen))
+                   (vector? form) (into []))])))
           (recur (next dt) (into ret [form]))))
       ret)))
 
