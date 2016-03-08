@@ -1,5 +1,6 @@
 (ns om-css.tests
   (:require [cljs.test :refer-macros [deftest testing is are run-tests]]
+            [om-css.core :as oc :refer-macros [defui]]
             [om-css.utils :as utils]))
 
 (def component-info
@@ -26,3 +27,12 @@
     ["ns_core_Foo_foo"] nil "ns_core_Foo_foo"
     ["ns_core_Foo_foo" "ns_core_Foo_bar"] nil "ns_core_Foo_foo ns_core_Foo_bar"
     ["ns_core_Foo_foo" :bar] #{:bar} "ns_core_Foo_foo ns_core_Foo_bar"))
+
+(defui StyledComponent
+  static oc/Style
+  (style [this]
+    [[:.some-class {:text-align "center"}]]))
+
+(deftest test-prefix-class-name
+  (is (= (oc/prefix-class-name StyledComponent :some-class)
+         "om_css_tests_StyledComponent_some-class")))
