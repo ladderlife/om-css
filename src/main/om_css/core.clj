@@ -59,7 +59,7 @@
                             (reshape-render post component-info classes-seen))
                    (vector? form) (into []))])))
           (recur (next dt) (into ret [form]))))
-      ret)))
+      (seq ret))))
 
 (defn reshape-defui [forms component-info classes-seen]
   (letfn [(split-on-object [forms]
@@ -245,7 +245,7 @@
                         :component-name component-name
                         :classes classes}
         body (if (vector? (first body))
-               (into [] (map #(reshape-render % component-info classes)) body)
+               (map #(into [] (reshape-render % component-info #{})) body)
                (reshape-render body component-info classes))]
     (when css-str
       (swap! css assoc [ns-name name] css-str))

@@ -231,3 +231,18 @@
 
 (defcard omcss-25-card
   (omcss-25-component))
+
+;;====================
+;; nested-fns in components
+
+(defcomponent nested-fn-component [_ _]
+  [[:hi {:text-align "center"}]]
+  (dom/div nil
+    "something"
+    (map-indexed
+      (fn [index _]
+        (dom/p {:class :hi} (str "index: " index)))
+      [1 2 3 4])))
+
+(defcard nested-fn-card
+  (nested-fn-component))
