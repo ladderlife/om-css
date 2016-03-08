@@ -47,7 +47,7 @@
                                 symbol)}
                         ;; TODO: does this need to be hardcoded?
                         ['map 'keep 'run! 'reduce 'filter 'mapcat])
-                props' (if coll-fn?
+                props' (if (and coll-fn? (sequential? props))
                          (reshape-render props component-info classes-seen)
                          (reshape-props props component-info classes-seen))
                 pre' (if (= (count pre) 2)

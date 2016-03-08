@@ -281,7 +281,7 @@
                    (fn [index _]
                      (dom/p {:class :hi} (str "index: " index)))
                    [1 2 3 4])))]
-    (is (=( oc/reshape-render form component-info #{:hi})
+    (is (= ( oc/reshape-render form component-info #{:hi})
            '((dom/div nil
                  "something"
                  (map-indexed
@@ -290,4 +290,8 @@
                              :omcss$info {:component-name "Foo"
                                           :ns-name "ns.core"}}
                        (str "index: " index)))
-                   [1 2 3 4])))))))
+                   [1 2 3 4]))))))
+  (let [form '((dom/div nil
+                 (->> [1 2] (map my-fn))))]
+    (is (= (oc/reshape-render form component-info #{})
+           form))))
