@@ -273,3 +273,21 @@
   (let [form '((dom/div (my-class :root)))]
     (is (= (oc/reshape-render form component-info #{:root})
           '((dom/div (my-class "ns_core_Foo_root")))))))
+
+(deftest test-nested-fns-inside-element
+  (let [form '((dom/div nil
+                 "something"
+                 (map-indexed
+                   (fn [index _]
+                     (dom/p {:class :hi} (str "index: " index)))
+                   [1 2 3 4])))]
+    (is (=( oc/reshape-render form component-info #{:hi})
+           '((dom/div nil
+                 "something"
+                 (map-indexed
+                   (fn [index _]
+                     (dom/p {:class "ns_core_Foo_hi"
+                             :omcss$info {:component-name "Foo"
+                                          :ns-name "ns.core"}}
+                       (str "index: " index)))
+                   [1 2 3 4])))))))

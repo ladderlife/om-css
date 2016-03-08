@@ -41,7 +41,15 @@
       (let [form (first dt)]
         (if (and (sequential? form) (not (empty? form)))
           (let [[[sym props :as pre] post] (split-at 2 form)
-                props' (reshape-props props component-info classes-seen)
+                coll-fn? (some #{(-> (str sym)
+                                (string/split #"-")
+                                first
+                                symbol)}
+                        ;; TODO: does this need to be hardcoded?
+                        ['map 'keep 'run! 'reduce 'filter 'mapcat])
+                props' (if coll-fn?
+                         (reshape-render props component-info classes-seen)
+                         (reshape-props props component-info classes-seen))
                 pre' (if (= (count pre) 2)
                        (list sym props')
                        (list sym))]
