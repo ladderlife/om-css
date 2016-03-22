@@ -13,6 +13,7 @@
                  [devcards "0.2.1-6" :scope "test"]
                  [devcards-om-next "0.1.1" :scope "test"]]
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
+  :jar-exclusions [#"test" #"devcards" #"public"]
   :source-paths ["src/main" "src/devcards" "src/test"]
   :clean-targets ^{:protect false} ["target"
                                     "resources/public/out"
