@@ -6,7 +6,7 @@
   :repositories [["clojars" {:sign-releases false}]]
   :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
                  [org.clojure/clojurescript "1.7.228" :scope "provided"]
-                 [org.omcljs/om "1.0.0-alpha30" :scope "provided"]
+                 [org.omcljs/om "1.0.0-alpha31" :scope "provided"]
                  [garden "1.3.2"]
 
                  [figwheel-sidecar "0.5.0-6" :scope "test"]
