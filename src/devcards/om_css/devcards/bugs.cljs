@@ -245,3 +245,24 @@
 
 (defcard nested-fn-card
   (nested-fn-component))
+
+;;====================
+;; OMCSS-32
+
+(defui OMCSS-32-Component
+  Object
+  (render [this]
+    (dom/div {:ref :some-ref} "div with ref")))
+
+(def omcss-32-reconciler
+  (om/reconciler {:state (atom nil)
+                  :parser (om/parser {:read #(do {})})}))
+
+(defcard-om-next omcss-32-card
+  OMCSS-32-Component
+  omcss-32-reconciler)
+
+(deftest test-omcss-32
+  (let [c (om/class->any omcss-32-reconciler OMCSS-32-Component)]
+    (is (some? c))
+    (is (some? (om/react-ref c :some-ref)))))
