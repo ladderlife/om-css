@@ -47,15 +47,20 @@
     :else opt-val))
 
 (defn- format-attrs [attrs]
-  "leaves :className unchanged, formats :class accordingly"
+  "Leaves :className unchanged, formats :class accordingly. Converts :ref to string."
   (->> attrs
     (cljs.core/map
       (fn [[k v]]
         [(format-opt-key k)
-         (if (= k :class)
+         (condp = k
+           :class
            (let [component-info (:omcss$info attrs)
                  classes-seen (:classes component-info)]
              (utils/format-class-names v component-info classes-seen))
+
+           :ref
+           (str v)
+
            (format-opt-val v))]))
     (reduce (fn [m [k v]]
               (if (= k :className)
