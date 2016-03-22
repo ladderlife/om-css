@@ -83,15 +83,14 @@
   [:.root {:text-decoration :underline}]
   (omcss-7-component-1 {:class [:root]}))
 
-
 (defcard omcss-7-card
   "Test that assigning classes to child components works"
   (omcss-7component-2))
 
 (deftest omcss-7-test
   (let [c (gdom/getElement "omcss-7")
-          cns (.-className c)
-          cns (.split cns " ")]
+        cns (.-className c)
+        cns (.split cns " ")]
       (is (not (nil? c)))
       (is (not (nil?
                  (some

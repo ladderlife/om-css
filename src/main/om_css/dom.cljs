@@ -77,7 +77,7 @@
   "Returns JavaScript object for React DOM attributes from opts map"
   [opts]
   (if (map? opts)
-    (->> opts
+    (-> opts
       format-attrs
       clj->js)
     opts))
