@@ -1,6 +1,17 @@
 (ns om-css.utils
   (:require [clojure.string :as string]))
 
+#?(:clj
+   (defn- cljs-env? [env]
+     (boolean (:ns env))))
+
+#?(:clj
+   (defmacro if-cljs
+     "Return `then` if we are generating cljs code and `else` for Clojure code."
+     [then else]
+     (if (cljs-env? &env) then else)))
+
+
 (defn format-class-name [class-name component-info]
   "generate namespace qualified classname"
   (if (symbol? class-name)

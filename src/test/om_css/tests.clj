@@ -1,6 +1,9 @@
 (ns om-css.tests
   (:require [clojure.test :refer [deftest testing is are]]
-            [om-css.core :as oc]
+            [om-css.core :as oc :refer [defui defcomponent]]
+            [om-css.dom :as dom]
+            [cellophane.next :as cellophane]
+            [cellophane.dom :as cdom]
             [om-css.utils :as utils]))
 
 (def component-info
@@ -295,3 +298,26 @@
                  (->> [1 2] (map my-fn))))]
     (is (= (oc/reshape-render form component-info #{})
            form))))
+
+(defui SimpleDefui
+  oc/Style
+  (style [_]
+    [:.root {:color :green}])
+  Object
+  (render [this]
+    (dom/div {:id "simple"
+              :class :root}
+      "root div")))
+
+(defcomponent SimpleDefcomponent [props children]
+  [:.inline {:display "inline"}]
+  (dom/div {:class :inline} "inline div"))
+
+(deftest test-om-css-cellophane
+  (testing "cellophane & defui"
+    (let [c ((cellophane/factory SimpleDefui))]
+      (is (= (dom/render-to-str c)
+            "<div><div id=\"simple\" class=\"om_css_tests_SimpleDefui_root\" data-reactid=\".0\">root div</div></div>"))))
+  (testing "cellophane & defcomponent"
+    (is (= (cdom/render-to-str (SimpleDefcomponent))
+          "<div><div class=\"om_css_tests_SimpleDefcomponent_inline\" data-reactid=\".0\">inline div</div></div>"))))
