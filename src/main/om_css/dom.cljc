@@ -12,7 +12,10 @@
    (def form-tags '[input textarea option select]))
 
 #?(:clj
-   (def all-tags (concat dom/tags form-tags)))
+   (def all-tags
+     ;; cellophane has these tags
+     (cond-> dom/tags
+       (not (some (set form-tags) dom/tags)) (concat form-tags))))
 
 #?(:clj
    (defmacro gen-tag-fns
