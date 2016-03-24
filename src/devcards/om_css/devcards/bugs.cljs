@@ -266,3 +266,14 @@
   (let [c (om/class->any omcss-32-reconciler OMCSS-32-Component)]
     (is (some? c))
     (is (some? (om/react-ref c :some-ref)))))
+
+;;====================
+;; Test that #js {} as props works
+
+(defui JSObjsComponent
+  Object
+  (render [this]
+    (dom/div #js {:id "js-obj-comp"} "I work")))
+
+(defcard-om-next js-objs-card
+  JSObjsComponent)

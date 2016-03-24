@@ -89,11 +89,12 @@
 
 (defn parse-params
   [params]
-  (update
-    (if (map? (first params))
-      [(first params) (rest params)]
-      [nil params])
-    1 flatten))
+  (let [props (first params)]
+    (update
+      (if (or (object? props) (map? props))
+        [props (rest params)]
+        [nil params])
+      1 flatten)))
 
 (defn render-elem
   [render & params]
