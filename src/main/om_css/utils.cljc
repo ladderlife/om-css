@@ -34,9 +34,9 @@
               (keyword? cns))
             (let [cns' (map #(cond-> %
                                (and classes-seen
-                                 (if (true? classes-seen)
-                                   classes-seen
-                                   (get classes-seen %))) (format-class-name component-info))
+                                 (or (true? classes-seen)
+                                     (get classes-seen %)))
+                               (format-class-name component-info))
                          (if (sequential? cns) cns [cns]))]
               (if (sequential? cns)
                 (into [] cns')
