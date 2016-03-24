@@ -15,6 +15,7 @@
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
   :jar-exclusions [#"test" #"devcards" #"public"]
   :source-paths ["src/main" "src/devcards" "src/test"]
+  :test-paths ["src/test"]
   :clean-targets ^{:protect false} ["target"
                                     "resources/public/out"
                                     "resources/public/main.js"]
