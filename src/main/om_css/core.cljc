@@ -325,5 +325,6 @@
                (println (string/join "\n" (vals new-state)))
                (println))))))))
 
+;; TODO: Don't really want to be generating a CSS file on the server
 #?(:clj
    (setup-io!))
