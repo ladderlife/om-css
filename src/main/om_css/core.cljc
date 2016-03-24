@@ -326,4 +326,4 @@
                (println))))))))
 
 #?(:clj
-   (if-cljs (setup-io!) nil))
+   (setup-io!))
