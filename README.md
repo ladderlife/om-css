@@ -1,4 +1,4 @@
-# Om-css
+# Om-css [![Circle CI](https://circleci.com/gh/ladderlife/om-css.svg?style=svg)](https://circleci.com/gh/ladderlife/om-css)
 
 Collocated CSS in Om Next components.
 
