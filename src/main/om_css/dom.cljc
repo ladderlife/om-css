@@ -140,7 +140,6 @@
    [& params]
    (apply dom/render-to-str params))
 
-#?(:cljs
-   (defn node
-     [& params]
-     (apply dom/node params)))
+(defn node
+  [& params]
+  (apply dom/node params))
