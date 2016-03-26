@@ -118,7 +118,10 @@
   (let [props (first params)]
     (update
       (if #?(:clj (map? props)
-             :cljs (or (object? props) (map? props)))
+             :cljs (or (and (cljs.core/object? props)
+                            (not (.-$$typeof props))
+                            (not= (goog/typeOf (.-$$typeof props)) "symbol"))
+                       (map? props)))
         [props (rest params)]
         [nil params])
       1 flatten)))

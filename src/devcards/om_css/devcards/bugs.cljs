@@ -277,3 +277,18 @@
 
 (defcard-om-next js-objs-card
   JSObjsComponent)
+
+
+;;====================
+;; no protocol method -assoc for [object Object]
+
+(defcomponent no-protocol-defc [props children]
+  (dom/div props children))
+
+(defcard no-protocol-card
+  (no-protocol-defc
+    (dom/div {:id "no-protocol-comp"} "some text")))
+
+(deftest test-no-protocol-for-object
+  (let [c (gdom/getElement "no-protocol-comp")]
+    (is (some? c))))
