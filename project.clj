@@ -1,4 +1,4 @@
- (defproject com.ladderlife/om-css "0.5.2"
+ (defproject com.ladderlife/om-css "0.5.3-SNAPSHOT"
   :description "Om Next + CSS"
   :url "http://github.com/ladderlife/om-css"
   :license {:name "Eclipse Public License"
