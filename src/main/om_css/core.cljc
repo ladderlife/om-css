@@ -1,7 +1,6 @@
 (ns om-css.core
   #?(:cljs (:require-macros [om-css.core :refer [defui defcomponent]]))
-  (:require #?@(:clj  [[cellophane.next :as cellophane]
-                       [cljs.env :as env]
+  (:require #?@(:clj  [[cljs.env :as env]
                        [clojure.java.io :as io]
                        [garden.core :as garden]]
                 :cljs [[om.next :as om]])
