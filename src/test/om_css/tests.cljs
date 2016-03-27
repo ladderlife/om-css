@@ -1,5 +1,6 @@
 (ns om-css.tests
   (:require [cljs.test :refer-macros [deftest testing is are run-tests]]
+            [cljsjs.react]
             [om-css.core :as oc :refer-macros [defui]]
             [om-css.utils :as utils]))
 

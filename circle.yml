@@ -1,0 +1,12 @@
+machine:
+  java:
+    version: oraclejdk8
+
+dependencies:
+  override:
+    - lein with-profiles +client-test deps
+
+test:
+  override:
+    lein test
+    lein with-profile +client-test doo node test once

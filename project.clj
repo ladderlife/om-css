@@ -14,6 +14,16 @@
                  [figwheel-sidecar "0.5.0-6" :scope "test"]
                  [devcards "0.2.1-6" :scope "test"]
                  [devcards-om-next "0.1.1" :scope "test"]]
+  :profiles {:client-test {:dependencies [[cljsjs/react "0.14.3-0"]]
+                           :plugins [[lein-doo "0.1.6"]
+                                     [lein-cljsbuild "1.1.3"]]
+                           :cljsbuild {:builds [{:id           "test"
+                                                 :source-paths ["src/main" "src/test"]
+                                                 :compiler     {:output-to "target/js/client_test.js"
+                                                                :output-dir "target/js/out"
+                                                                :main          om-css.runner
+                                                                :target :nodejs
+                                                                :optimizations :none}}]}}}
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
   :jar-exclusions [#"test" #"devcards" #"public"]
   :source-paths ["src/main" "src/devcards" "src/test"]
