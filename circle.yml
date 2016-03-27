@@ -8,5 +8,5 @@ dependencies:
 
 test:
   override:
-    lein test
-    lein with-profile +client-test doo node test once
+    - lein test
+    - lein with-profile +client-test doo node test once
