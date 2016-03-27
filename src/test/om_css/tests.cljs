@@ -17,8 +17,8 @@
             :component-name "ns.core/Foo"})
         "ns_core_Foo_foo")))
 
-(deftest test-format-class-names
-  (are [cns classes-seen res] (= (utils/format-class-names cns component-info classes-seen) res)
+(deftest test-format-dom-class-names
+  (are [cns classes-seen res] (= (utils/format-dom-class-names cns component-info classes-seen) res)
     "ns_core_Foo_foo" #{} "ns_core_Foo_foo"
     :foo #{:foo} "ns_core_Foo_foo"
     [:foo] #{:foo} "ns_core_Foo_foo"

@@ -34,7 +34,7 @@
                       (reduce
                         (fn [m [k v]]
                           (if (= k :class)
-                            (assoc m k (utils/format-class-names
+                            (assoc m k (utils/format-unevaluated-class-names
                                          v component-info classes-seen))
                             (assoc m k v)))
                         {:omcss$info component-info}))]
@@ -44,7 +44,7 @@
        (let [[pre post] (split-with (complement map?) props)
              props' (concat (map #(cond-> %
                                     (keyword? %)
-                                    (utils/format-class-names component-info #{:root}))
+                                    (utils/format-unevaluated-class-names component-info #{:root}))
                               pre)
                       (map #(reshape-props % component-info classes-seen) post))]
          props')

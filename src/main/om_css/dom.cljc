@@ -82,7 +82,7 @@
              :class
              (let [component-info (:omcss$info attrs)
                    classes-seen (:classes component-info)]
-               (utils/format-class-names v component-info classes-seen))
+               (utils/format-dom-class-names v component-info classes-seen))
 
              :ref
              (str v)

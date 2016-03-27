@@ -188,7 +188,7 @@
                                                   :class (subs (str "ns_core_Foo_foo") 1)})))
 
 (deftest test-format-class-names
-  (are [cns res] (= (utils/format-class-names cns component-info) res)
+  (are [cns res] (= (utils/format-unevaluated-class-names cns component-info) res)
     :foo "ns_core_Foo_foo"
     "foo" "ns_core_Foo_foo"
     [:foo] ["ns_core_Foo_foo"]
@@ -321,3 +321,25 @@
   (testing "cellophane & defcomponent"
     (is (= (cdom/render-to-str (SimpleDefcomponent))
           "<div><div class=\"om_css_tests_SimpleDefcomponent_inline\" data-reactid=\".0\">inline div</div></div>"))))
+
+(defui LazySeqChild
+  Object
+  (render [this]
+    (let [props (cellophane/props this)]
+      (dom/div {:class (:class props)} "bar"))))
+
+(def lazy-seq-child (cellophane/factory LazySeqChild))
+
+(defui LazySeqParent
+  oc/Style
+  (style [_]
+    [[:.foo {:text-align "center"}]])
+  Object
+  (render [this]
+    (dom/div nil
+      (lazy-seq-child (assoc {} :class
+                        (filter some? ["foo" nil]))))))
+
+(deftest test-om-css-cellophane-lazy-seqs
+  (is (= (dom/render-to-str ((cellophane/factory LazySeqParent)))
+         "<div><div data-reactid=\".0\"><div class=\"foo\" data-reactid=\".0.0\">bar</div></div></div>")))

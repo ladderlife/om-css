@@ -25,42 +25,41 @@
         "_" component-name "_" class-name))))
 
 
-(defn format-cns* [cns component-info classes-seen]
-  ;; unevaluated data structures: a list might be a function call, we
-  ;; only support strings, vectors or keywords
-  #?(:clj (cond
-            (or (vector? cns)
-              (string? cns)
-              (keyword? cns))
-            (let [cns' (map #(cond-> %
-                               (and classes-seen
-                                 (or (true? classes-seen)
-                                     (get classes-seen %)))
-                               (format-class-name component-info))
-                         (if (sequential? cns) cns [cns]))]
-              (if (sequential? cns)
-                (into [] cns')
-                (first cns')))
-
-            (map? cns)
-            (into {} (map (fn [[k v]]
-                   [(format-cns* k component-info classes-seen)
-                    (format-cns* v component-info classes-seen)])) cns)
-
-            (list? cns)
-            (map #(format-cns* % component-info classes-seen) cns)
-
-            :else cns)
-     ;; only transform keywords at runtime, vectors and strings have
-     ;; already been prefixed at macro-expansion time
-     :cljs (->> (if (sequential? cns) cns [cns])
-             (map #(cond-> %
-                     (and (keyword? %)
-                       (get classes-seen %)) (format-class-name component-info)))
-             (string/join " "))))
-
-(defn format-class-names
+(defn format-unevaluated-class-names
   ([cns component-info]
-   (format-cns* cns component-info true))
+   (format-unevaluated-class-names cns component-info true))
   ([cns component-info classes-seen]
-   (format-cns* cns component-info classes-seen)))
+   ;; unevaluated data structures: a list might be a function call, we
+   ;; only support strings, vectors or keywords
+   (cond
+     (or (vector? cns)
+       (string? cns)
+       (keyword? cns))
+     (let [cns' (map #(cond-> %
+                        (and classes-seen
+                          (or (true? classes-seen)
+                            (get classes-seen %)))
+                        (format-class-name component-info))
+                  (if (sequential? cns) cns [cns]))]
+       (if (sequential? cns)
+         (into [] cns')
+         (first cns')))
+
+     (map? cns)
+     (into {} (map (fn [[k v]]
+                     [(format-unevaluated-class-names k component-info classes-seen)
+                      (format-unevaluated-class-names v component-info classes-seen)])) cns)
+
+     (list? cns)
+     (map #(format-unevaluated-class-names % component-info classes-seen) cns)
+
+     :else cns)))
+
+;; only transform keywords at runtime, vectors and strings have
+;; already been prefixed at macro-expansion time
+(defn format-dom-class-names [cns component-info classes-seen]
+  (->> (if (sequential? cns) cns [cns])
+    (map #(cond-> %
+            (and (keyword? %)
+              (get classes-seen %)) (format-class-name component-info)))
+    (string/join " ")))
