@@ -343,3 +343,9 @@
 (deftest test-om-css-cellophane-lazy-seqs
   (is (= (dom/render-to-str ((cellophane/factory LazySeqParent)))
          "<div><div data-reactid=\".0\"><div class=\"foo\" data-reactid=\".0.0\">bar</div></div></div>")))
+
+(deftest test-om-css-30
+  (is (= (oc/reshape-render '((dom/div (dom/div (dom/div {:class :component}))))
+           component-info #{:component})
+         '((dom/div (dom/div (dom/div {:omcss$info {:component-name "Foo", :ns-name "ns.core"}
+                                       :class "ns_core_Foo_component"})))))))

@@ -1,7 +1,8 @@
 (ns om-css.core
   #?(:cljs (:require-macros [om-css.core :refer [defui defcomponent]]
                             [om-css.output-css]))
-  (:require #?@(:clj  [[garden.core :as garden]]
+  (:require #?@(:clj  [[om-css.dom :as dom]
+                       [garden.core :as garden]]
                 :cljs [[om.next :as om]])
             [clojure.string :as string]
             [om-css.utils :as utils #?@(:clj [:refer [if-cljs]])])
@@ -66,9 +67,15 @@
                    props' (if (and coll-fn? (sequential? props))
                             (reshape-render props component-info classes-seen)
                             (reshape-props props component-info classes-seen))
-                   pre' (if (= (count pre) 2)
+                   props-omitted? (and (sequential? props)
+                                       (symbol? (first props))
+                                       (some #{(symbol (name (first props)))} dom/all-tags))
+                   pre' (if (and (= (count pre) 2)
+                                 (not props-omitted?))
                           (list sym props')
-                          (list sym))]
+                          (list sym))
+                   post (cond->> post
+                          props-omitted? (cons props'))]
                (recur (next dt)
                  (into ret
                    [(cond->> (concat pre'
