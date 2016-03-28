@@ -1,9 +1,7 @@
 (ns om-css.core
   #?(:cljs (:require-macros [om-css.core :refer [defui defcomponent]]
                             [om-css.output-css]))
-  (:require #?@(:clj  [[cljs.env :as env]
-                       [clojure.java.io :as io]
-                       [garden.core :as garden]]
+  (:require #?@(:clj  [[garden.core :as garden]]
                 :cljs [[om.next :as om]])
             [clojure.string :as string]
             [om-css.utils :as utils #?@(:clj [:refer [if-cljs]])])
