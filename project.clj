@@ -5,7 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :repositories [["clojars" {:sign-releases false}]]
   :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
-                 [org.clojure/clojurescript "1.8.34" :scope "provided"]
+                 [org.clojure/clojurescript "1.8.40" :scope "provided"]
                  [org.omcljs/om "1.0.0-alpha31" :scope "provided"]
 
                  [com.ladderlife/cellophane "0.2.2"]
