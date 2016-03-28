@@ -120,8 +120,8 @@
       (if #?(:clj (and (map? props)
                        (not (record? props)))
              :cljs (or (and (cljs.core/object? props)
-                            (not (.-$$typeof props))
-                            (not= (goog/typeOf (.-$$typeof props)) "symbol"))
+                            (not (aget props "$$typeof"))
+                            (not= (goog/typeOf (aget props "$$typeof")) "symbol"))
                        (map? props)))
         [props (rest params)]
         [nil params])
