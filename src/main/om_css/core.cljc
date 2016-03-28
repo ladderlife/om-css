@@ -1,5 +1,6 @@
 (ns om-css.core
-  #?(:cljs (:require-macros [om-css.core :refer [defui defcomponent]]))
+  #?(:cljs (:require-macros [om-css.core :refer [defui defcomponent]]
+                            [om-css.output-css]))
   (:require #?@(:clj  [[cljs.env :as env]
                        [clojure.java.io :as io]
                        [garden.core :as garden]]
@@ -7,7 +8,6 @@
             [clojure.string :as string]
             [om-css.utils :as utils #?@(:clj [:refer [if-cljs]])])
   #?(:clj (:import (java.io FileNotFoundException))))
-  
 
 (defprotocol Style
    (style [this]))
@@ -302,28 +302,3 @@
        (if (vector? style)
          rest
          body))))
-
-#?(:clj
-   (defn setup-io! []
-     (let [opts (some-> env/*compiler*
-                  deref
-                  :options)
-           default-fname "out.css"
-           fname (or (:css-output-to opts)
-                   (str (:output-dir opts) default-fname)
-                   (string/join "/"
-                     (-> (:output-to opts)
-                       (string/split #"/")
-                       (butlast)
-                       vec
-                       (conj default-fname))))]
-       (add-watch css :watcher
-         (fn [k atom old-state new-state]
-           (with-open [out ^java.io.Writer (io/make-writer fname {})]
-             (binding [*out* out]
-               (println (string/join "\n" (vals new-state)))
-               (println))))))))
-
-;; TODO: Don't really want to be generating a CSS file on the server
-#?(:clj
-   (setup-io!))
