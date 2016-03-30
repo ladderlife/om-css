@@ -43,7 +43,7 @@
        (let [[pre post] (split-with (complement map?) props)
              props' (concat (map #(cond-> %
                                     (keyword? %)
-                                    (utils/format-unevaluated-class-names component-info #{:root}))
+                                    (utils/format-unevaluated-class-names component-info classes-seen))
                               pre)
                       (map #(reshape-props % component-info classes-seen) post))]
          props')
