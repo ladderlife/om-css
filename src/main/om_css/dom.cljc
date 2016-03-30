@@ -108,9 +108,12 @@
   "Returns JavaScript object for React DOM attributes from opts map"
   [opts]
   (if (map? opts)
-    (-> opts
+    (->> opts
       format-attrs
-      #?(:cljs clj->js))
+      #?(:cljs clj->js
+         :clj  (into {} (clojure.core/map
+                          (fn [[k v]]
+                            [k (cond-> v (keyword? v) name)])))))
     opts))
 
 (defn parse-params

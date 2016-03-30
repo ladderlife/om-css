@@ -349,3 +349,11 @@
            component-info #{:component})
          '((dom/div (dom/div (dom/div {:omcss$info {:component-name "Foo", :ns-name "ns.core"}
                                        :class "ns_core_Foo_component"})))))))
+
+(deftest test-format-opts
+  (are [opts res] (= (dom/format-opts opts) res)
+    {:media :desktop} {:media "desktop"}
+    {:class :foo
+     :omcss$info (merge component-info
+                   {:classes #{:foo}})} {:className "ns_core_Foo_foo"}))
+
