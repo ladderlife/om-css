@@ -120,12 +120,13 @@
   [params]
   (let [props (first params)]
     (update
-      (if #?(:clj (and (map? props)
+      (if (or (nil? props)
+            #?(:clj  (and (map? props)
                        (not (record? props)))
-             :cljs (or (and (cljs.core/object? props)
-                            (not (aget props "$$typeof"))
-                            (not= (goog/typeOf (aget props "$$typeof")) "symbol"))
-                       (map? props)))
+               :cljs (or (and (cljs.core/object? props)
+                           (not (aget props "$$typeof"))
+                           (not= (goog/typeOf (aget props "$$typeof")) "symbol"))
+                       (map? props))))
         [props (rest params)]
         [nil params])
       1 flatten)))
