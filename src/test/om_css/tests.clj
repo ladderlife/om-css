@@ -311,7 +311,7 @@
 
 (defcomponent SimpleDefcomponent [props children]
   [:.inline {:display "inline"}]
-  (dom/div {:class :inline}))
+  (dom/div {:class :inline} "inline div"))
 
 (deftest test-om-css-cellophane
   (testing "cellophane & defui"
