@@ -311,16 +311,16 @@
 
 (defcomponent SimpleDefcomponent [props children]
   [:.inline {:display "inline"}]
-  (dom/div {:class :inline} "inline div"))
+  (dom/div {:class :inline}))
 
 (deftest test-om-css-cellophane
   (testing "cellophane & defui"
     (let [c ((cellophane/factory SimpleDefui))]
-      (is (= (dom/render-to-str c)
-            "<div><div id=\"simple\" class=\"om_css_tests_SimpleDefui_root\" data-reactid=\".0\">root div</div></div>"))))
+      (is (= (#'cdom/render-to-str* c)
+            "<div id=\"simple\" class=\"om_css_tests_SimpleDefui_root\" data-reactid=\".0\">root div</div>"))))
   (testing "cellophane & defcomponent"
-    (is (= (cdom/render-to-str (SimpleDefcomponent))
-          "<div><div class=\"om_css_tests_SimpleDefcomponent_inline\" data-reactid=\".0\">inline div</div></div>"))))
+    (is (= (#'cdom/render-to-str* (SimpleDefcomponent))
+          "<div class=\"om_css_tests_SimpleDefcomponent_inline\" data-reactid=\".0\">inline div</div>"))))
 
 (defui LazySeqChild
   Object
@@ -341,8 +341,8 @@
                         (filter some? ["foo" nil]))))))
 
 (deftest test-om-css-cellophane-lazy-seqs
-  (is (= (dom/render-to-str ((cellophane/factory LazySeqParent)))
-         "<div><div data-reactid=\".0\"><div class=\"foo\" data-reactid=\".0.0\">bar</div></div></div>")))
+  (is (= (#'cdom/render-to-str* ((cellophane/factory LazySeqParent)))
+         "<div data-reactid=\".0\"><div class=\"foo\" data-reactid=\".0.0\">bar</div></div>")))
 
 (deftest test-om-css-30
   (is (= (oc/reshape-render '((dom/div (dom/div (dom/div {:class :component}))))
