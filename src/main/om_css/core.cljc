@@ -15,7 +15,7 @@
    (defn prefix-class-name
      [x class-name]
      "Given a component instance or a component class and a class-name,
-   prefixes the class-name with the component info"
+      prefixes the class-name with the component info"
      (let [class (pr-str (cond-> x (om/component? x) type))
            [ns-name component-name] (string/split class #"/")
            info {:ns-name ns-name

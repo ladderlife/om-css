@@ -209,7 +209,7 @@
           cns (.-className c)
           cns (.split cns " ")]
       (is (not (nil? c)))
-      (is (not (nil? (some #{":outer"} cns))))))
+      (is (not (nil? (some #{"outer"} cns))))))
 
 ;;====================
 ;; OMCSS-22

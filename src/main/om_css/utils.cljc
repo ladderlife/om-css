@@ -60,6 +60,6 @@
 (defn format-dom-class-names [cns component-info classes-seen]
   (->> (if (sequential? cns) cns [cns])
     (map #(cond-> %
-            (and (keyword? %)
-              (get classes-seen %)) (format-class-name component-info)))
+            (keyword? %) name
+            (get classes-seen %) (format-class-name component-info)))
     (string/join " ")))
