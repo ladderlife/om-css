@@ -25,7 +25,7 @@
                                                                 :target :nodejs
                                                                 :optimizations :none}}]}}}
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
-  :jar-exclusions [#"test" #"devcards" #"public"]
+  :jar-exclusions [#"test" #"devcards" #"public" #"runner"]
   :source-paths ["src/main" "src/devcards" "src/test"]
   :test-paths ["src/test"]
   :clean-targets ^{:protect false} ["target"
