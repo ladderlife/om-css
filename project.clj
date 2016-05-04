@@ -5,16 +5,16 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :repositories [["clojars" {:sign-releases false}]]
   :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
-                 [org.clojure/clojurescript "1.8.40" :scope "provided"]
-                 [org.omcljs/om "1.0.0-alpha31" :scope "provided"]
+                 [org.clojure/clojurescript "1.8.51" :scope "provided"]
+                 [org.omcljs/om "1.0.0-alpha34" :scope "provided"]
 
                  [com.ladderlife/cellophane "0.2.4"]
                  [garden "1.3.2"]
 
-                 [figwheel-sidecar "0.5.0-6" :scope "test"]
+                 [figwheel-sidecar "0.5.2" :scope "test"]
                  [devcards "0.2.1-6" :scope "test"]
                  [devcards-om-next "0.1.1" :scope "test"]]
-  :profiles {:client-test {:dependencies [[cljsjs/react "0.14.3-0"]]
+  :profiles {:client-test {:dependencies [[cljsjs/react "15.0.1-1"]]
                            :plugins [[lein-doo "0.1.6"]
                                      [lein-cljsbuild "1.1.3"]]
                            :cljsbuild {:builds [{:id           "test"
