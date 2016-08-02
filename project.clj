@@ -4,18 +4,18 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :repositories [["clojars" {:sign-releases false}]]
-  :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
-                 [org.clojure/clojurescript "1.8.51" :scope "provided"]
-                 [org.omcljs/om "1.0.0-alpha34" :scope "provided"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha10" :scope "provided"]
+                 [org.clojure/clojurescript "1.9.89" :scope "provided"]
+                 [org.omcljs/om "1.0.0-alpha41" :scope "provided"]
 
-                 [com.ladderlife/cellophane "0.2.4"]
+                 [com.ladderlife/cellophane "0.3.5"]
                  [garden "1.3.2"]
 
-                 [figwheel-sidecar "0.5.2" :scope "test"]
-                 [devcards "0.2.1-6" :scope "test"]
-                 [devcards-om-next "0.1.1" :scope "test"]]
-  :profiles {:client-test {:dependencies [[cljsjs/react "15.0.1-1"]]
-                           :plugins [[lein-doo "0.1.6"]
+                 [figwheel-sidecar "0.5.4-7" :scope "test"]
+                 [devcards "0.2.1-7" :scope "test"]
+                 [devcards-om-next "0.3.0" :scope "test"]]
+  :profiles {:client-test {:dependencies [[cljsjs/react "15.3.0-0"]]
+                           :plugins [[lein-doo "0.1.7"]
                                      [lein-cljsbuild "1.1.3"]]
                            :cljsbuild {:builds [{:id           "test"
                                                  :source-paths ["src/main" "src/test"]
