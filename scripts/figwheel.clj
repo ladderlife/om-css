@@ -2,7 +2,9 @@
          '[figwheel-sidecar.repl-api :as ra])
 
 (ra/start-figwheel!
-  {:figwheel-options {:css-dirs ["resources/public"]}
+  {:figwheel-options {:css-dirs ["resources/public"]
+                      :validate-config false
+                      :validate-interactive false}
    :build-ids ["devcards"]
    :all-builds
    [{:id "devcards"

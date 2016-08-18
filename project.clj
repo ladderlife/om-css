@@ -5,7 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :repositories [["clojars" {:sign-releases false}]]
   :dependencies [[org.clojure/clojure "1.9.0-alpha10" :scope "provided"]
-                 [org.clojure/clojurescript "1.9.89" :scope "provided"]
+                 [org.clojure/clojurescript "1.9.216" :scope "provided"]
                  [org.omcljs/om "1.0.0-alpha41" :scope "provided"]
 
                  [com.ladderlife/cellophane "0.3.5"]
@@ -23,7 +23,10 @@
                                                                 :output-dir "target/js/out"
                                                                 :main          om-css.runner
                                                                 :target :nodejs
-                                                                :optimizations :none}}]}}}
+                                                                :optimizations :none}}]}}
+             :dev {:dependencies [[sablono "0.7.4"]
+                                  [com.cemerick/piggieback "0.2.1"
+                                    :exclusions [org.clojure/clojurescript]]]}}
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
   :jar-exclusions [#"test" #"devcards" #"public" #"runner"]
   :source-paths ["src/main" "src/devcards" "src/test"]
