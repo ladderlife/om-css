@@ -4,7 +4,8 @@
             [om-css.dom :as dom]
             [cellophane.next :as cellophane]
             [cellophane.dom :as cdom]
-            [om-css.utils :as utils]))
+            [om-css.utils :as utils]
+            [cljs.analyzer.api :as ana]))
 
 (def component-info
   {:component-name "Foo"
@@ -128,9 +129,9 @@
                    static field a 3
                    static om/IQuery
                    (query [this] [:a])]]
-    (is (= (oc/reshape-defui form component-info #{:foo})
+    (is (= (oc/reshape-defui nil form component-info #{:foo})
           expected))
-    (is (= (oc/reshape-defui
+    (is (= (oc/reshape-defui nil
              '(Object (render [this] (dom/div nil "foo")))
              component-info nil)
           '[Object (render [this] (dom/div nil "foo"))]))))
@@ -284,7 +285,7 @@
                    (fn [index _]
                      (dom/p {:class :hi} (str "index: " index)))
                    [1 2 3 4])))]
-    (is (= ( oc/reshape-render form component-info #{:hi})
+    (is (= (oc/reshape-render form component-info #{:hi})
            '((dom/div nil
                  "something"
                  (map-indexed
@@ -356,3 +357,22 @@
     {:class :foo
      :omcss$info (merge component-info
                    {:classes #{:foo}})} {:className "ns_core_Foo_foo"}))
+
+(deftest test-sablono-integration
+  (with-redefs [ana/resolve (fn [_ sym]
+                              (when (= (name sym) "html")
+                                {:arglists '([content]),
+                                 :doc "Compile the Hiccup `content` into a React DOM node.",
+                                 :line 10, :column 1,
+                                 :file "sablono/core.clj",
+                                 :name 'sablono.core/html,
+                                 :ns 'sablono.core,
+                                 :macro true}))]
+    (is (= (oc/reshape-render {} '((html [:div {:class :component}]))
+             component-info #{:component})
+          '((html [:div {:omcss$info {:component-name "Foo", :ns-name "ns.core"}
+                         :class "ns_core_Foo_component"}]))))
+    (is (= (oc/reshape-render {} '((sab/html [:div [:div {:class :component}]]))
+               component-info #{:component})
+           '((sab/html [:div [:div {:omcss$info {:component-name "Foo", :ns-name "ns.core"}
+                                    :class "ns_core_Foo_component"}]]))))))

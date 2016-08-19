@@ -2,7 +2,8 @@
   #?(:cljs (:require-macros [om-css.core :refer [defui defcomponent]]
                             [om-css.output-css]))
   (:require #?@(:clj  [[om-css.dom :as dom]
-                       [garden.core :as garden]]
+                       [garden.core :as garden]
+                       [cljs.analyzer.api :as ana]]
                 :cljs [[om.next :as om]])
             [clojure.string :as string]
             [om-css.utils :as utils #?@(:clj [:refer [if-cljs]])])
@@ -52,40 +53,46 @@
 
 #?(:clj
    (defn reshape-render
-     [form component-info classes-seen]
-     (loop [dt (seq form) ret []]
-       (if dt
-         (let [form (first dt)]
-           (if (and (sequential? form) (not (empty? form)))
-             (let [[[sym props :as pre] post] (split-at 2 form)
-                   coll-fn? (some #{(-> (str sym)
-                                      (string/split #"-")
-                                      first
-                                      symbol)}
-                              ;; TODO: does this need to be hardcoded?
-                              ['map 'keep 'run! 'reduce 'filter 'mapcat])
-                   props' (if (and coll-fn? (sequential? props))
-                            (reshape-render props component-info classes-seen)
-                            (reshape-props props component-info classes-seen))
-                   props-omitted? (and (sequential? props)
-                                       (symbol? (first props))
-                                       (some #{(symbol (name (first props)))} dom/all-tags))
-                   pre' (if (and (= (count pre) 2)
-                                 (not props-omitted?))
-                          (list sym props')
-                          (list sym))
-                   post (cond->> post
-                          props-omitted? (cons props'))]
-               (recur (next dt)
-                 (into ret
-                   [(cond->> (concat pre'
-                               (reshape-render post component-info classes-seen))
-                      (vector? form) (into []))])))
-             (recur (next dt) (into ret [form]))))
-         (seq ret)))))
+     ([form component-info classes-seen]
+      (reshape-render nil form component-info classes-seen))
+     ([env form component-info classes-seen]
+      (loop [dt (seq form) ret []]
+        (if dt
+          (let [form (first dt)]
+            (if (and (sequential? form) (not (empty? form)))
+              (let [[[sym props :as pre] post] (split-at 2 form)
+                    sablono? (when (and env (symbol? sym))
+                               (= (-> (ana/resolve env sym) :name)
+                                  'sablono.core/html))
+                    coll-fn? (some #{(-> (str sym)
+                                       (string/split #"-")
+                                       first
+                                       symbol)}
+                               ;; TODO: does this need to be hardcoded?
+                               ['map 'keep 'run! 'reduce 'filter 'mapcat])
+                    props' (if (and coll-fn? (sequential? props))
+                             (reshape-render env props component-info classes-seen)
+                             (reshape-props props component-info classes-seen))
+                    props-omitted? (and (sequential? props)
+                                     (let [tag (first props)]
+                                       (and (or sablono? (symbol? tag) (keyword? tag))
+                                            (some #{(symbol (name tag))} dom/all-tags))))
+                    pre' (if (and (= (count pre) 2)
+                               (not props-omitted?))
+                           (list sym props')
+                           (list sym))
+                    post (cond->> post
+                           props-omitted? (cons props'))]
+                (recur (next dt)
+                  (into ret
+                    [(cond->> (concat pre'
+                                (reshape-render env post component-info classes-seen))
+                       (vector? form) (into []))])))
+              (recur (next dt) (into ret [form]))))
+          (seq ret))))))
 
 #?(:clj
-   (defn reshape-defui [forms component-info classes-seen]
+   (defn reshape-defui [env forms component-info classes-seen]
      (letfn [(split-on-object [forms]
                (split-with (complement '#{Object}) forms))
              (split-on-render [forms]
@@ -98,7 +105,7 @@
            (if (seq post)
              (let [[pre [render & post]] (split-on-render obj-forms)]
                (into (conj ret sym)
-                 (concat pre [(reshape-render render component-info classes-seen)]
+                 (concat pre [(reshape-render env render component-info classes-seen)]
                    post)))
              ret))))))
 
@@ -241,7 +248,7 @@
            component-info {:ns-name ns-name
                            :component-name (str name)
                            :classes classes}
-           forms (reshape-defui forms component-info classes)
+           forms (reshape-defui env forms component-info classes)
            name (cond-> name
                   (-> name meta :once) (vary-meta assoc :once true))]
        (when css-str
@@ -288,8 +295,8 @@
                            :component-name component-name
                            :classes classes}
            body (if (vector? (first body))
-                  (map #(into [] (reshape-render % component-info #{})) body)
-                  (reshape-render body component-info classes))]
+                  (map #(into [] (reshape-render env % component-info #{})) body)
+                  (reshape-render env body component-info classes))]
        (when css-str
          (swap! css assoc [ns-name name] css-str))
        `(defn ~name [& params#]

@@ -6,7 +6,8 @@
             [om.next :as om]
             [om-css.dom :as dom]
             [om-css.core :as oc :refer-macros [defui defcomponent]]
-            [om-css.devcards.bugs]))
+            [om-css.devcards.bugs]
+            [om-css.devcards.sablono]))
 
 (def style-1
   {:text-align :center})
@@ -138,7 +139,7 @@
   "Render a `defcomponent` component with multiple classes"
   (MultipleClassesDefcomponent nil
     (dom/div nil "child")))
- 
+
 (deftest multiple-classnames-in-defcomponent
   (testing "`defcomponent` with styles"
     (let [c (gdom/getElement "multiple-classes-test-defcomponent")
