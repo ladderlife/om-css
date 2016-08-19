@@ -1,4 +1,4 @@
- (defproject com.ladderlife/om-css "0.6.0"
+ (defproject com.ladderlife/om-css "0.6.1-SNAPSHOT"
   :description "Colocated CSS in Om Next components"
   :url "http://github.com/ladderlife/om-css"
   :license {:name "Eclipse Public License"
