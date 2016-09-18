@@ -7,6 +7,7 @@ Colocated CSS in Om Next components.
 - [Installation](#installation)
 - [Guide](#guide)
   - [Getting started](#getting-started)
+    - [Usage with boot](#usage-with-boot)
   - [Defining components](#defining-components)
     - [`defui`](#defui)
     - [`defcomponent`](#defcomponent)
@@ -45,6 +46,17 @@ Om-css provides a way to collocate CSS styles in components. However, this alone
            :source-map true
            :optimizations :none
            :css-output-to "resources/public/main.css"}
+```
+
+#### Usage with boot
+
+The `:css-output-to` option of om-css is a bit of a mismatch with boot, because boot will write to an new folder after every cljs compile. The solution here is to not set the `:css-output-to` option. Then om-css will write the css file in the same place as your cljs-output. So let's say you have a `public/js/main.cljs.edn` file then boot-cljs will write to `public/js/main.js` and om-css will write to `public/js/main.outout.css`. If you would like a nicer css filename you can use the `sift` task of boot for the preceding case you could use it like this:
+
+```clojure
+(deftask compile-cljs-and-css
+  (comp
+   (cljs :ids #{"public/js/main"})
+   (sift :move {#"^public\/js\/main\.outout\.css$" "public/css/next.css"})))
 ```
 
 ### Defining components
